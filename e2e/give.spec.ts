@@ -2,7 +2,15 @@ import { expect, test } from "@playwright/test"
 
 import { giveCta, helpBar, scripture, whyWeGive } from "../src/content/give"
 import { churchName, shellSentence } from "./copy"
-import { box, desktop, headerNav, phone } from "./helpers"
+import {
+  box,
+  desktop,
+  expectBoxWithin,
+  headerNav,
+  phone,
+  tabletViewportLabel,
+  tabletViewports,
+} from "./helpers"
 
 test.beforeEach(async ({ page }) => {
   await page.setViewportSize(desktop)
@@ -82,4 +90,32 @@ test("narrow viewport stacks and still shows every give block", async ({ page })
 
   expect((await box(scriptureRegion)).y).toBeLessThan((await box(whyHeading)).y)
   expect((await box(help)).y).toBeLessThan((await box(footer)).y)
+})
+
+test("keeps the citation above help and both Give panels inside the page at tablet sizes", async ({
+  page,
+}) => {
+  for (const viewport of tabletViewports) {
+    await test.step(tabletViewportLabel(viewport), async () => {
+      await page.setViewportSize(viewport)
+      await page.goto("/give")
+
+      const pageBase = page.locator(".give-page")
+      const scripturePanel = page.getByRole("region", { name: "Scripture" })
+      const whyPanel = page.locator(".give-why")
+      const citation = page.locator(".give-scripture-citation")
+      const help = page.locator(".give-help")
+
+      await expect(page.getByText(scripture.citation)).toBeVisible()
+      await expect(help).toBeVisible()
+
+      const citationBox = await box(citation)
+      const helpBox = await box(help)
+      expect(citationBox.y + citationBox.height).toBeLessThanOrEqual(helpBox.y + 1)
+
+      const baseBox = await box(pageBase)
+      expectBoxWithin(await box(scripturePanel), baseBox)
+      expectBoxWithin(await box(whyPanel), baseBox)
+    })
+  }
 })

@@ -169,6 +169,20 @@ html:has(.about-page) {
   scroll-snap-type: y mandatory;
   scroll-padding-top: 0;
 }
+html:has(.about-page).about-fragment-nav {
+  scroll-snap-type: none;
+  scroll-snap-type: y mandatory;
+}
+html:has(.about-page).about-fragment-nav .site-header,
+html:has(.about-page).about-fragment-nav .site-footer,
+html:has(.about-page).about-fragment-nav .scene:not(:target) {
+  scroll-snap-align: none;
+  scroll-snap-stop: normal;
+}
+html:has(.about-page).about-fragment-nav .scene:target {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
 html:has(.about-page) .site-header {
   position: relative;
   scroll-snap-align: start;
@@ -224,6 +238,9 @@ html:has(.about-page) {
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 .about-page .scene:nth-of-type(even) {
   grid-template-columns: 0.9fr 1.1fr;
@@ -237,6 +254,7 @@ html:has(.about-page) {
   justify-content: flex-end;
   padding: 6.5rem 3rem 3.2rem;
   background: var(--ink);
+  min-width: 0;
 }
 .about-page .copy h1,
 .about-page .copy h2 {
@@ -278,6 +296,9 @@ html:has(.about-page) {
 }
 .about-page .plate {
   min-height: 100svh;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   background: var(--cobalt) center / cover no-repeat;
 }
 .about-page #born-again .plate,
@@ -326,6 +347,18 @@ html:has(.about-page) {
   margin-top: 1.4rem;
   max-width: 36ch;
   color: var(--band-muted);
+}
+@media (min-width: 801px) and (max-width: 64rem) {
+  .about-page .copy {
+    padding: 4rem 1.75rem 2.25rem;
+  }
+  .about-page .copy h1,
+  .about-page .copy h2 {
+    font-size: clamp(2.6rem, 5.2vw, 4.25rem);
+  }
+  .about-page .plate {
+    background-size: contain;
+  }
 }
 @media (max-width: 800px) {
   .about-page .about-scene-dots {
@@ -413,6 +446,11 @@ html:has(.about-page) {
 .footer-place { margin-left: auto; max-width: 42ch; text-align: right; }
 .footer-church { margin: 0 0 0.35rem; font-size: 1.05rem; font-weight: 600; line-height: 1.25; }
 .footer-address { margin: 0; color: var(--mist); font-size: 0.95rem; line-height: 1.45; }
+@media (max-width: 64rem) {
+  .site-footer { flex-direction: column; gap: 0.75rem; }
+  .footer-place { margin-left: 0; text-align: left; }
+  .footer-social { position: static; left: auto; top: auto; translate: none; justify-content: flex-start; }
+}
 
 .home-page.page-width { width: 100%; max-width: none; margin: 0; }
 .hero {
@@ -787,6 +825,8 @@ button.text-link {
   display: flex;
   flex-direction: column;
   min-height: calc(100dvh - 5.5rem);
+  overflow: clip;
+  background: var(--ink);
 }
 .give-page .give-main {
   margin: 0;
@@ -795,12 +835,14 @@ button.text-link {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  min-width: 0;
 }
 .give-page .give-leaflet {
   display: grid;
   grid-template-columns: 1fr 1fr;
   flex: 1 1 auto;
   min-height: 0;
+  min-width: 0;
 }
 .give-page .give-scripture {
   display: flex;
@@ -810,6 +852,8 @@ button.text-link {
   background: var(--cobalt);
   color: var(--paper);
   padding: clamp(2.5rem, 5vw, 4.5rem) clamp(1.75rem, 4vw, 3.5rem);
+  min-width: 0;
+  overflow: hidden;
 }
 .give-page .give-scripture-text {
   max-width: 28ch;
@@ -839,6 +883,8 @@ button.text-link {
   background: var(--ink);
   color: var(--paper);
   padding: clamp(2.5rem, 5vw, 4.5rem) clamp(1.75rem, 4vw, 3.75rem);
+  min-width: 0;
+  overflow: hidden;
 }
 .give-page .give-why h1 {
   max-width: none;
@@ -906,7 +952,7 @@ button.text-link {
   text-decoration: underline;
   text-decoration-thickness: 1px;
 }
-@media (max-width: 50rem) {
+@media (max-width: 64rem) {
   .give-page {
     min-height: 0;
   }
@@ -1248,6 +1294,8 @@ button.text-link {
   display: flex;
   flex-direction: column;
   min-height: calc(100dvh - 5.5rem);
+  overflow: clip;
+  background: var(--ink);
 }
 .contact-page .contact-main {
   margin: 0;
@@ -1256,12 +1304,14 @@ button.text-link {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  min-width: 0;
 }
 .contact-page .contact-desk {
   display: grid;
   grid-template-columns: 1fr 1fr;
   flex: 1 1 auto;
   min-height: 0;
+  min-width: 0;
 }
 .contact-page .contact-visit {
   display: flex;
@@ -1271,6 +1321,8 @@ button.text-link {
   background: var(--cobalt);
   color: var(--paper);
   padding: clamp(2.5rem, 5vw, 4.5rem) clamp(1.75rem, 4vw, 3.5rem);
+  min-width: 0;
+  overflow: hidden;
 }
 .contact-page .contact-visit-eyebrow {
   margin: 0;
@@ -1327,6 +1379,8 @@ button.text-link {
   background: var(--contact-olive);
   color: var(--paper);
   padding: clamp(2.5rem, 5vw, 4.5rem) clamp(1.75rem, 4vw, 3.75rem);
+  min-width: 0;
+  overflow: hidden;
 }
 .contact-page .contact-arrival h2 {
   margin: 0;
@@ -1387,7 +1441,7 @@ button.text-link {
   text-decoration: underline;
   text-decoration-thickness: 1px;
 }
-@media (max-width: 50rem) {
+@media (max-width: 64rem) {
   .contact-page {
     min-height: 0;
   }

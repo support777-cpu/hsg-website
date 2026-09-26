@@ -33,6 +33,15 @@ test("scene dots are a client module that sets aria-current from intersection", 
   expect(dotsSource).toMatch(/aria-label=["']Scenes["']/)
 })
 
+test("scene dots recompute aria-current on hash change without setting scroll position", () => {
+  expect(dotsSource).toMatch(/addEventListener\(\s*["']hashchange["']/)
+  expect(dotsSource).toMatch(/setCurrentFromHash|setCurrentFromVisible/)
+  expect(dotsSource).toMatch(/getBoundingClientRect\(\)\.top/)
+  expect(dotsSource).toMatch(/about-fragment-nav/)
+  expect(dotsSource).not.toMatch(/\.scrollTo\s*\(|scrollIntoView\s*\(/)
+  expect(dotsSource).not.toMatch(/scrollingElement\.scrollTop\s*=/)
+})
+
 test("scenes CSS is scoped to .about-page and ships no entrance motion kit", () => {
   expect(globalsSource).toMatch(/\.about-page\s+\.scene\b|\.about-page\.scene\b|\.about-page\s*\{[^}]*\}[\s\S]*\.scene/)
   expect(globalsSource).toMatch(/\.about-page[\s\S]*scroll-snap-align:\s*start/)
@@ -40,13 +49,17 @@ test("scenes CSS is scoped to .about-page and ships no entrance motion kit", () 
   expect(globalsSource).not.toMatch(/animation:\s*[^;]*(fade|slide)/i)
 })
 
-function aboutPhoneMediaBlock(css: string): string {
-  const marker = "@media (max-width: 800px)"
+function mediaBlockContaining(
+  css: string,
+  marker: string,
+  needle: string,
+  label: string,
+): string {
   let from = 0
   while (from < css.length) {
     const start = css.indexOf(marker, from)
     if (start < 0) {
-      throw new Error("no @media (max-width: 800px) block found")
+      throw new Error(`no ${marker} block found`)
     }
     const open = css.indexOf("{", start)
     let depth = 0
@@ -57,14 +70,32 @@ function aboutPhoneMediaBlock(css: string): string {
         depth -= 1
         if (depth === 0) {
           const block = css.slice(open + 1, i)
-          if (block.includes(".about-page .scene")) return block
+          if (block.includes(needle)) return block
           from = i + 1
           break
         }
       }
     }
   }
-  throw new Error("no about-page phone media block found")
+  throw new Error(`no ${label} media block found`)
+}
+
+function aboutPhoneMediaBlock(css: string): string {
+  return mediaBlockContaining(
+    css,
+    "@media (max-width: 800px)",
+    ".about-page .scene",
+    "about-page phone",
+  )
+}
+
+function aboutTabletMediaBlock(css: string): string {
+  return mediaBlockContaining(
+    css,
+    "@media (min-width: 801px) and (max-width: 64rem)",
+    ".about-page .plate",
+    "about-page tablet",
+  )
 }
 
 test("About snap port is zero while other routes keep 6.5rem scroll padding", () => {
@@ -189,4 +220,71 @@ test("≤800px hides about scene dots without reserved overlay space", () => {
   expect(phoneBlock).not.toMatch(
     /\.about-page\s+\.about-scene-dots\s*\{[^}]*(?:bottom:\s*1rem|padding:\s*0\.25rem)/,
   )
+})
+
+test("tablet band keeps photo plates contained without horizontal clip", () => {
+  const tabletBlock = aboutTabletMediaBlock(globalsSource)
+
+  expect(globalsSource).toMatch(
+    /\.about-page\s+\.scene\s*\{[^}]*width:\s*100%[^}]*max-width:\s*100%[^}]*overflow:\s*hidden/,
+  )
+  expect(globalsSource).toMatch(
+    /\.about-page\s+\.plate\s*\{[^}]*min-width:\s*0[^}]*max-width:\s*100%[^}]*overflow:\s*hidden/,
+  )
+  expect(tabletBlock).toMatch(
+    /\.about-page\s+\.plate\s*\{[^}]*background-size:\s*contain/,
+  )
+  expect(tabletBlock).not.toMatch(
+    /\.about-page\s+#born-again\s+\.plate,\s*\.about-page\s+#church\s+\.plate\s*\{[^}]*background-size:\s*contain/,
+  )
+})
+
+function ruleBodyAfter(css: string, marker: string): string {
+  const start = css.indexOf(marker)
+  if (start < 0) {
+    throw new Error(`missing ${marker}`)
+  }
+  const open = css.indexOf("{", start)
+  let depth = 0
+  for (let i = open; i < css.length; i++) {
+    const ch = css[i]
+    if (ch === "{") depth += 1
+    else if (ch === "}") {
+      depth -= 1
+      if (depth === 0) return css.slice(open + 1, i)
+    }
+  }
+  throw new Error(`unclosed ${marker}`)
+}
+
+test("fragment navigation keeps y mandatory snap; only :target scene is a snap target", () => {
+  expect(globalsSource).toMatch(
+    /html:has\(\.about-page\)\s*\{[^}]*scroll-snap-type:\s*y\s+mandatory/,
+  )
+  expect(globalsSource).toMatch(
+    /html:has\(\.about-page\)\s+\.site-header\s*\{[^}]*scroll-snap-stop:\s*always/,
+  )
+
+  const fragmentHtml = ruleBodyAfter(
+    globalsSource,
+    "html:has(.about-page).about-fragment-nav {",
+  )
+  const snapTypes = [...fragmentHtml.matchAll(/scroll-snap-type:\s*([^;]+)/g)].map((match) =>
+    match[1]!.trim(),
+  )
+  expect(snapTypes.at(-1)).toBe("y mandatory")
+
+  const nonTargets = ruleBodyAfter(
+    globalsSource,
+    "html:has(.about-page).about-fragment-nav .scene:not(:target) {",
+  )
+  expect(nonTargets).toMatch(/scroll-snap-align:\s*none/)
+  expect(nonTargets).toMatch(/scroll-snap-stop:\s*normal/)
+
+  const target = ruleBodyAfter(
+    globalsSource,
+    "html:has(.about-page).about-fragment-nav .scene:target {",
+  )
+  expect(target).toMatch(/scroll-snap-align:\s*start/)
+  expect(target).not.toMatch(/scroll-snap-align:\s*none/)
 })

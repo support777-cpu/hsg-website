@@ -78,3 +78,48 @@ test("contact CSS is scoped under .contact-page", () => {
     /\.contact-page[\s\S]*contact-strip|\.contact-page\s+\.contact-strip/,
   )
 })
+
+function contactTabletStackBlock(css: string): string {
+  const marker = "@media (max-width: 64rem)"
+  let from = 0
+  while (from < css.length) {
+    const start = css.indexOf(marker, from)
+    if (start < 0) {
+      throw new Error("no @media (max-width: 64rem) block found")
+    }
+    const open = css.indexOf("{", start)
+    let depth = 0
+    for (let i = open; i < css.length; i++) {
+      const ch = css[i]
+      if (ch === "{") depth += 1
+      else if (ch === "}") {
+        depth -= 1
+        if (depth === 0) {
+          const block = css.slice(open + 1, i)
+          if (block.includes(".contact-page .contact-desk")) return block
+          from = i + 1
+          break
+        }
+      }
+    }
+  }
+  throw new Error("no contact-page tablet stack media block found")
+}
+
+test("Contact panels stay clipped to the page base at tablet-owned widths", () => {
+  expect(globalsSource).toMatch(
+    /\.contact-page\s*\{[^}]*overflow:\s*clip[^}]*background:\s*var\(--ink\)/,
+  )
+  expect(globalsSource).toMatch(
+    /\.contact-page\s+\.contact-visit\s*\{[^}]*overflow:\s*hidden/,
+  )
+  expect(globalsSource).toMatch(
+    /\.contact-page\s+\.contact-arrival\s*\{[^}]*overflow:\s*hidden/,
+  )
+
+  const tabletBlock = contactTabletStackBlock(globalsSource)
+  expect(tabletBlock).toMatch(
+    /\.contact-page\s+\.contact-desk\s*\{[^}]*grid-template-columns:\s*1fr/,
+  )
+  expect(tabletBlock).toMatch(/\.contact-page\s+\.contact-strip\s*\{/)
+})

@@ -5,6 +5,33 @@ export const atMenu = { width: 800, height: 900 }
 export const aboveMenu = { width: 801, height: 900 }
 export const phone = { width: 320, height: 700 }
 export const phoneLarge = { width: 390, height: 844 }
+export const tabletPortrait = { width: 768, height: 1024 }
+export const tabletLandscape = { width: 1024, height: 768 }
+export const tabletViewports = [tabletPortrait, tabletLandscape] as const
+
+export function tabletViewportLabel(viewport: { width: number; height: number }) {
+  return `${viewport.width}×${viewport.height}`
+}
+
+export type Box = { x: number; y: number; width: number; height: number }
+
+export function boxesOverlap(a: Box, b: Box) {
+  return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y
+}
+
+export function expectBoxWithin(inner: Box, outer: Box, tolerance = 1) {
+  expect(inner.x).toBeGreaterThanOrEqual(outer.x - tolerance)
+  expect(inner.y).toBeGreaterThanOrEqual(outer.y - tolerance)
+  expect(inner.x + inner.width).toBeLessThanOrEqual(outer.x + outer.width + tolerance)
+  expect(inner.y + inner.height).toBeLessThanOrEqual(outer.y + outer.height + tolerance)
+}
+
+export async function expectHorizontallyInViewport(locator: Locator, page: Page, tolerance = 1) {
+  const value = await box(locator)
+  const width = page.viewportSize()!.width
+  expect(value.x).toBeGreaterThanOrEqual(-tolerance)
+  expect(value.x + value.width).toBeLessThanOrEqual(width + tolerance)
+}
 
 export function headerNav(page: Page) {
   return page.getByRole("navigation", { name: "Main navigation" })
