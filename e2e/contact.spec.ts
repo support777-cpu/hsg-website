@@ -2,7 +2,16 @@ import { expect, test, type Page } from "@playwright/test"
 
 import { arrival, contactStrip, visit } from "../src/content/contact"
 import { churchName, shellSentence } from "./copy"
-import { box, desktop, headerNav, phone, paintedBackground } from "./helpers"
+import {
+  box,
+  desktop,
+  expectBoxWithin,
+  headerNav,
+  phone,
+  paintedBackground,
+  tabletViewportLabel,
+  tabletViewports,
+} from "./helpers"
 
 const creamBand = "rgb(222, 223, 201)"
 
@@ -162,4 +171,21 @@ test("narrow stack shows Visit above Arrival with all blocks visible", async ({ 
   const stripBox = await box(strip)
   expect(visitBox.y).toBeLessThan(arrivalBox.y)
   expect(arrivalBox.y).toBeLessThan(stripBox.y)
+})
+
+test("keeps Contact visit and arrival panels inside the page at tablet sizes", async ({
+  page,
+}) => {
+  for (const viewport of tabletViewports) {
+    await test.step(tabletViewportLabel(viewport), async () => {
+      await page.setViewportSize(viewport)
+      await page.goto("/contact")
+
+      await expect(page.locator("footer.site-footer")).toHaveCount(0)
+
+      const baseBox = await box(page.locator(".contact-page"))
+      expectBoxWithin(await box(visitRegion(page)), baseBox)
+      expectBoxWithin(await box(arrivalRegion(page)), baseBox)
+    })
+  }
 })

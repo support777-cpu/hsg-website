@@ -56,3 +56,61 @@ test("give CSS is scoped under .give-page", () => {
   expect(globalsSource).toMatch(/\.give-page[\s\S]*give-leaflet|\.give-page\s+\.give-leaflet/)
   expect(globalsSource).toMatch(/\.give-page[\s\S]*give-help|\.give-page\s+\.give-help/)
 })
+
+function giveTabletStackBlock(css: string): string {
+  const marker = "@media (max-width: 64rem)"
+  let from = 0
+  while (from < css.length) {
+    const start = css.indexOf(marker, from)
+    if (start < 0) {
+      throw new Error("no @media (max-width: 64rem) block found")
+    }
+    const open = css.indexOf("{", start)
+    let depth = 0
+    for (let i = open; i < css.length; i++) {
+      const ch = css[i]
+      if (ch === "{") depth += 1
+      else if (ch === "}") {
+        depth -= 1
+        if (depth === 0) {
+          const block = css.slice(open + 1, i)
+          if (block.includes(".give-page .give-leaflet")) return block
+          from = i + 1
+          break
+        }
+      }
+    }
+  }
+  throw new Error("no give-page tablet stack media block found")
+}
+
+test("Give panels stay clipped to the page base at tablet-owned widths", () => {
+  expect(globalsSource).toMatch(
+    /\.give-page\s*\{[^}]*overflow:\s*clip[^}]*background:\s*var\(--ink\)/,
+  )
+  expect(globalsSource).toMatch(
+    /\.give-page\s+\.give-scripture\s*\{[^}]*overflow:\s*hidden/,
+  )
+  expect(globalsSource).toMatch(
+    /\.give-page\s+\.give-why\s*\{[^}]*overflow:\s*hidden/,
+  )
+
+  const tabletBlock = giveTabletStackBlock(globalsSource)
+  expect(tabletBlock).toMatch(
+    /\.give-page\s+\.give-leaflet\s*\{[^}]*grid-template-columns:\s*1fr/,
+  )
+  expect(tabletBlock).toMatch(/\.give-page\s+\.give-help\s*\{/)
+})
+
+test("Give citation stays above the help bar in document order", () => {
+  const citation = source.search(/give-scripture-citation|scripture\.citation/)
+  const help = source.search(/className=["']give-help["']/)
+  expect(citation).toBeGreaterThan(-1)
+  expect(help).toBeGreaterThan(citation)
+  expect(globalsSource).toMatch(
+    /\.give-page\s*\{[^}]*flex-direction:\s*column/,
+  )
+  expect(globalsSource).not.toMatch(
+    /\.give-page\s+\.give-help\s*\{[^}]*order:\s*-?\d/,
+  )
+})

@@ -93,3 +93,54 @@ test("about route snaps SiteFooter after scenes; reduced-motion disables snap", 
     /@media\s*\(\s*prefers-reduced-motion:\s*reduce\s*\)\s*\{[^}]*html:has\(\.about-page\)\s*\{[^}]*scroll-snap-type:\s*none/,
   )
 })
+
+function footerTabletMediaBlock(css: string): string {
+  const marker = "@media (max-width: 64rem)"
+  let from = 0
+  while (from < css.length) {
+    const start = css.indexOf(marker, from)
+    if (start < 0) {
+      throw new Error("no @media (max-width: 64rem) block found")
+    }
+    const open = css.indexOf("{", start)
+    let depth = 0
+    for (let i = open; i < css.length; i++) {
+      const ch = css[i]
+      if (ch === "{") depth += 1
+      else if (ch === "}") {
+        depth -= 1
+        if (depth === 0) {
+          const block = css.slice(open + 1, i)
+          if (
+            block.includes(".footer-social") &&
+            block.includes(".site-footer") &&
+            !block.includes(".give-page") &&
+            !block.includes(".contact-page")
+          ) {
+            return block
+          }
+          from = i + 1
+          break
+        }
+      }
+    }
+  }
+  throw new Error("no SiteFooter tablet media block found")
+}
+
+test("SiteFooter stacks address and socials at tablet-owned widths", () => {
+  const tabletBlock = footerTabletMediaBlock(globals)
+
+  expect(tabletBlock).toMatch(
+    /\.site-footer\s*\{[^}]*flex-direction:\s*column/,
+  )
+  expect(tabletBlock).toMatch(
+    /\.footer-social\s*\{[^}]*position:\s*static/,
+  )
+  expect(tabletBlock).toMatch(
+    /\.footer-place\s*\{[^}]*margin-left:\s*0/,
+  )
+  expect(globals).toMatch(
+    /\.footer-social\s*\{[^}]*position:\s*absolute/,
+  )
+})

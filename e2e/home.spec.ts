@@ -14,7 +14,17 @@ import {
   sundayNote,
   sundayServices,
 } from "./copy"
-import { aboveMenu, atMenu, box, desktop, headerNav, paintedBackground } from "./helpers"
+import {
+  aboveMenu,
+  atMenu,
+  box,
+  boxesOverlap,
+  desktop,
+  headerNav,
+  paintedBackground,
+  tabletViewportLabel,
+  tabletViewports,
+} from "./helpers"
 
 const goingOnScripture = homeContent.find(
   (section) => section.heading === "What’s going on",
@@ -297,4 +307,30 @@ test("shows inline navigation above 800px and Menu at 800px", async ({ page }) =
   await page.setViewportSize(atMenu)
   await expect(page.getByRole("button", { name: "Menu" })).toBeVisible()
   await expect(headerNav(page).getByRole("link", { name: "Give" })).toBeHidden()
+})
+
+test("keeps footer address and social logos from overlapping at tablet sizes", async ({
+  page,
+}) => {
+  for (const viewport of tabletViewports) {
+    await test.step(tabletViewportLabel(viewport), async () => {
+      await page.setViewportSize(viewport)
+      await page.goto("/")
+
+      const address = page.locator(".footer-address")
+      const socials = page.locator(".footer-social")
+      const logos = socials.getByRole("link")
+
+      await expect(address).toBeVisible()
+      await expect(socials).toBeVisible()
+      await expect(logos).toHaveCount(3)
+
+      const addressBox = await box(address)
+      expect(boxesOverlap(addressBox, await box(socials))).toBe(false)
+
+      for (const logo of await logos.all()) {
+        expect(boxesOverlap(addressBox, await box(logo))).toBe(false)
+      }
+    })
+  }
 })

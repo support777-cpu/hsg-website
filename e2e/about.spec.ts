@@ -12,11 +12,15 @@ import {
   atMenu,
   box,
   desktop,
+  expectHorizontallyInViewport,
+  expectNoHorizontalScroll,
   headerNav,
   phone,
   phoneLarge,
   plateStyleMetrics,
   sceneBoxMetrics,
+  tabletViewportLabel,
+  tabletViewports,
   waitForScrollStable,
 } from "./helpers"
 
@@ -155,6 +159,44 @@ async function expectPhoneSceneFits(page: Page, sceneId: string) {
     }
   }
   await expect(band.getByText(storyContinuesAddress)).toBeInViewport()
+}
+
+async function expectFragmentNavCss(page: Page) {
+  await expect(async () => {
+    const css = await page.evaluate(() => {
+      const root = document.documentElement
+      if (!root.classList.contains("about-fragment-nav")) return null
+      const target = document.querySelector<HTMLElement>(".scene:target")
+      const header = document.querySelector(".site-header")
+      const footer = document.querySelector(".site-footer")
+      if (!header || !footer || !target) return null
+      return {
+        htmlSnapType: getComputedStyle(root).scrollSnapType,
+        headerAlign: getComputedStyle(header).scrollSnapAlign,
+        footerAlign: getComputedStyle(footer).scrollSnapAlign,
+        targetAlign: getComputedStyle(target).scrollSnapAlign,
+        nonTargetAligns: [...document.querySelectorAll<HTMLElement>(".scene:not(:target)")].map(
+          (el) => getComputedStyle(el).scrollSnapAlign,
+        ),
+      }
+    })
+    expect(css).not.toBeNull()
+    expect(css!.htmlSnapType).toBe("y mandatory")
+    expect(css!.headerAlign).toBe("none")
+    expect(css!.footerAlign).toBe("none")
+    expect(css!.targetAlign).toBe("start")
+    expect(css!.nonTargetAligns).toHaveLength(scenes.length - 1)
+    expect(css!.nonTargetAligns.every((align) => align === "none")).toBe(true)
+  }).toPass({ timeout: 10_000 })
+}
+
+async function expectFragmentNavIdle(page: Page) {
+  await expect(page.locator("html")).not.toHaveClass(/about-fragment-nav/)
+}
+
+async function expectHeaderNotSnapStop(page: Page) {
+  const headerBottom = await page.locator(".site-header").evaluate((el) => el.getBoundingClientRect().bottom)
+  expect(headerBottom).toBeLessThanOrEqual(1)
 }
 
 async function expectFooterFullyVisible(page: Page) {
@@ -426,5 +468,69 @@ test("disables About scroll snapping under reduced motion", async ({ page }) => 
   await page.emulateMedia({ reducedMotion: "reduce" })
   await page.goto("/about")
   await expect(page.locator("html")).toHaveCSS("scroll-snap-type", "none")
+})
+
+test("keeps every About photo plate inside the tablet viewport", async ({ page }) => {
+  for (const viewport of tabletViewports) {
+    await test.step(tabletViewportLabel(viewport), async () => {
+      await page.setViewportSize(viewport)
+      await page.goto("/about")
+      await expectNoHorizontalScroll(page)
+
+      for (const scene of plateScenes) {
+        const plate = page.locator(`#${scene.id} [role="img"]`)
+        const sceneEl = sceneSection(page, scene.id)
+        await expectHorizontallyInViewport(plate, page)
+        await expectHorizontallyInViewport(sceneEl, page)
+        const overflow = await plate.evaluate((el) => ({
+          clientWidth: el.clientWidth,
+          scrollWidth: el.scrollWidth,
+        }))
+        expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.clientWidth + 1)
+      }
+    })
+  }
+})
+
+test("keeps y-mandatory snap during a scene-dot jump and settles flush past the header", async ({
+  page,
+}) => {
+  await disableReducedMotion(page)
+  await armAboutSnap(page)
+
+  const callIndex = scenes.findIndex((scene) => scene.id === "the-call")
+  await sceneNav(page).getByRole("link", { name: "The call" }).click()
+  await expectFragmentNavCss(page)
+  await expectSettledScene(page, callIndex)
+  await expectHeaderNotSnapStop(page)
+  await expect(sceneNav(page).getByRole("link", { name: "The call" })).toHaveAttribute(
+    "aria-current",
+    "true",
+  )
+  await expectFragmentNavIdle(page)
+
+  await nativeSnapStep(page, callIndex + 1)
+  await expectSettledScene(page, callIndex + 1)
+})
+
+test("recomputes the current scene on hash change and settles that fragment flush", async ({
+  page,
+}) => {
+  await disableReducedMotion(page)
+  await armAboutSnap(page)
+
+  const churchIndex = scenes.findIndex((scene) => scene.id === "church")
+  await page.evaluate(() => {
+    window.location.hash = "church"
+  })
+  await expect(page).toHaveURL(/#church$/)
+  await expectFragmentNavCss(page)
+  await expectSettledScene(page, churchIndex)
+  await expectHeaderNotSnapStop(page)
+  await expect(sceneNav(page).getByRole("link", { name: "The Church" })).toHaveAttribute(
+    "aria-current",
+    "true",
+  )
+  await expectFragmentNavIdle(page)
 })
 

@@ -88,6 +88,7 @@ Run `make build`, `make test`, and `make lint` after implementation; require “
 | Path | Change |
 | --- | --- |
 | `src/app/globals.css` | Tablet photo fit; absorbed snap/phone/dot CSS; Give/Contact panel containment and order; SiteFooter collision fix at tablet widths |
+| `src/components/about-scene-dots.tsx` | Recompute the visible scene on hash change and set `aria-current`; do not set scroll position |
 | `src/components/site-footer.tsx` | Only if markup change is required for non-colliding tablet layout |
 | `e2e/about.spec.ts` | Absorbed snap/dot coverage; tablet photo-fit coverage |
 | `e2e/give.spec.ts` / contact e2e (or shared tablet specs) | Tablet scripture/help order and panel containment |
@@ -98,6 +99,6 @@ Run `make build`, `make test`, and `make lint` after implementation; require “
 
 | Topic | Record |
 | --- | --- |
-| CSS-only scene-dot navigation | Absorbed intents forbid JavaScript-driven scroll positioning. Dot clicks must succeed via corrected CSS snap/anchors. If CSS cannot meet settled-position and `aria-current` checks, that blocks implementation under current policy. |
+| Scene-dot navigation | JavaScript must not drive scroll position. Wheel and PageDown snap stay unchanged. A scene-dot or fragment jump settles the target scene flush, without the header remaining as the snap stop. `src/components/about-scene-dots.tsx` recomputes the visible scene on hash change and sets `aria-current` from that result. |
 
 Unresolved decisions: none.
