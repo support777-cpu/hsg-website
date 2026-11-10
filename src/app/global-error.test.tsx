@@ -72,6 +72,15 @@ test("renders minimal document with site name, copy, and Home anchor", () => {
   expect(html).not.toContain('id="main-content"')
 })
 
+test("marks the global error shell and uses the text-link recovery treatment", () => {
+  const html = renderGlobalError(new Error("secret-marker"))
+
+  expect(html).toMatch(/class="[^"]*\bshell-page\b[^"]*\berror-state\b/)
+  expect(html).toMatch(/<button[^>]*class="text-link"/)
+  expect(html).toMatch(/<a[^>]*href="\/"[^>]*class="text-link"/)
+  expect(html).not.toMatch(/<main\b/i)
+})
+
 test("never renders error message, name, or digest", () => {
   const error = Object.assign(new Error("secret-marker"), {
     name: "LeakedErrorName",

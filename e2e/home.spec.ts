@@ -19,6 +19,7 @@ import {
   atMenu,
   box,
   boxesOverlap,
+  bethel,
   desktop,
   headerNav,
   paintedBackground,
@@ -295,7 +296,7 @@ test("names the brand from the logo and keeps routes in the header only", async 
   await expect(footerLinks.nth(1)).toHaveAccessibleName("Instagram")
   await expect(footerLinks.nth(2)).toHaveAccessibleName("YouTube")
   await expect(page.getByRole("main").getByRole("link", { name: "About", exact: true })).toHaveAttribute("href", "/about")
-  expect(await paintedBackground(page.getByRole("heading", { level: 1 }))).toBe("rgb(23, 61, 224)")
+  expect(await paintedBackground(page.getByRole("heading", { level: 1 }))).toBe(bethel.surface)
 })
 
 test("shows inline navigation above 800px and Menu at 800px", async ({ page }) => {

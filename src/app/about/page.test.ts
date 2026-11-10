@@ -198,8 +198,14 @@ test("≤800px about plates keep cover positions and contain treatment", () => {
     /#nations\s+\.plate\s*\{[^}]*background-size/,
   )
   expect(globalsSource).toMatch(
-    /\.about-page\s+#born-again\s+\.plate,\s*\.about-page\s+#church\s+\.plate\s*\{[^}]*background-color:\s*#2a160f/,
+    /\.about-page\s+#born-again\s+\.plate,\s*\.about-page\s+#church\s+\.plate\s*\{[^}]*background-color:\s*var\(--night\)/,
   )
+  expect(globalsSource).toMatch(/\.about-page\s+\.scene\s*\{[^}]*background:\s*var\(--surface\)/)
+  expect(globalsSource).toMatch(/\.about-page\s+\.copy\s*\{[^}]*background:\s*var\(--surface\)/)
+  expect(globalsSource).toMatch(
+    /\.about-page\s+\.plate\.band\s*\{[^}]*background:\s*var\(--surface-alternate\)/,
+  )
+  expect(globalsSource).not.toMatch(/#2a160f/)
   expect(globalsSource).toMatch(
     /\.about-page\s+#born-again\s+\.plate,\s*\.about-page\s+#church\s+\.plate\s*\{[^}]*background-size:\s*contain/,
   )

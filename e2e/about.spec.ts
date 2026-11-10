@@ -8,6 +8,7 @@ import {
 } from "../src/content/about"
 import { churchName, shellSentence } from "./copy"
 import {
+  bethel,
   aboveMenu,
   atMenu,
   box,
@@ -436,7 +437,7 @@ test("keeps cover and contain plate treatments on both phone viewports", async (
     for (const id of containPlates) {
       const metrics = await plateStyleMetrics(page.locator(`#${id} [role="img"]`))
       expect(metrics.backgroundSize).toBe("contain")
-      expect(metrics.backgroundColor).toBe("rgb(42, 22, 15)")
+      expect(metrics.backgroundColor).toBe(bethel.night)
     }
   }
 })

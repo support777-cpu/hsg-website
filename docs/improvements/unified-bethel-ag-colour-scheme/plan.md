@@ -1,6 +1,6 @@
 # Plan: unified-bethel-ag-colour-scheme
 Author: Udeet Gulati
-Status: draft
+Status: ready
 Links: [intent](./intent.md) · [spec](./spec.md)
 
 ## Files that change
@@ -28,7 +28,7 @@ Links: [intent](./intent.md) · [spec](./spec.md)
 
 id: unified-bethel-ag-colour-scheme_1_1
 title: Replace the shared palette and shell states with exact Bethel AG semantic tokens
-status: pending
+status: done
 acceptance_criteria:
 - `:root` defines every exact primitive in [ADR 0003 Theme palette](../../adr/0003-spirit-in-blue-visual-direction.md#theme-palette), maps the semantic Tailwind/shadcn tokens in [spec Semantic tokens](./spec.md#semantic-tokens), and keeps one `color-scheme: dark` token set.
 - Legacy `--ink`, `--paper`, `--mist`, `--acid`, `--cobalt`, `--band`, `--band-ink`, and `--band-link` aliases and route-local reinterpretations are absent.
@@ -52,7 +52,7 @@ depends_on: []
 
 id: unified-bethel-ag-colour-scheme_2_1
 title: Migrate every public route from alternating bands to the unified dark surface
-status: pending
+status: done
 acceptance_criteria:
 - Home, About, Give, Watch, Contact, and Events implement their row in [spec Route migration](./spec.md#route-migration): body and every major section resolve to Surface `#0c0c0e` without light, cobalt, acid, olive, or blue route-sized bands.
 - Surface alternate, Surface sunken, Night, and the blue-band gradient appear only in the bounded cards, menus, media backplates, overlays, controls, or grouped panels allowed by [spec Surface rules](./spec.md#surface-rules).

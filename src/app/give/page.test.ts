@@ -86,7 +86,19 @@ function giveTabletStackBlock(css: string): string {
 
 test("Give panels stay clipped to the page base at tablet-owned widths", () => {
   expect(globalsSource).toMatch(
-    /\.give-page\s*\{[^}]*overflow:\s*clip[^}]*background:\s*var\(--ink\)/,
+    /\.give-page\s*\{[^}]*overflow:\s*clip[^}]*background:\s*var\(--surface\)/,
+  )
+  expect(globalsSource).toMatch(
+    /\.give-page\s+\.give-why\s*\{[^}]*background:\s*var\(--surface\)/,
+  )
+  expect(globalsSource).toMatch(
+    /\.give-page\s+\.give-scripture\s*\{[^}]*background:\s*var\(--surface-alternate\)/,
+  )
+  expect(globalsSource).toMatch(
+    /\.give-page\s+\.give-help\s*\{[^}]*background:\s*var\(--surface-alternate\)/,
+  )
+  expect(globalsSource).toMatch(
+    /\.give-page\s+\.give-cta\s*\{[^}]*background:\s*var\(--accent-primary\)[^}]*color:\s*var\(--on-light-accent\)/,
   )
   expect(globalsSource).toMatch(
     /\.give-page\s+\.give-scripture\s*\{[^}]*overflow:\s*hidden/,

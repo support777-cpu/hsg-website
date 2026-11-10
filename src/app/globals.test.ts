@@ -5,27 +5,221 @@ import { expect, test } from "vitest"
 
 const source = readFileSync(join(import.meta.dirname, "globals.css"), "utf8")
 
-test("public theme tokens match Spirit in Blue; gold navy and logo mask are gone", () => {
-  expect(source).toMatch(/--ink:\s*#090d15/i)
-  expect(source).toMatch(/--paper:\s*#f5f3e8/i)
-  expect(source).toMatch(/--mist:\s*#b6c1d5/i)
-  expect(source).toMatch(/--acid:\s*#dee77f/i)
-  expect(source).toMatch(/--cobalt:\s*#173de0/i)
-  expect(source).toMatch(/--rule:\s*#394250/i)
-  expect(source).toMatch(/--band:\s*#dedfc9/i)
-  expect(source).toMatch(/--band-ink:\s*#141a20/i)
-  expect(source).toMatch(/--band-link:\s*#182da3/i)
+const primitives = [
+  ["--night", "#000000"],
+  ["--surface", "#0c0c0e"],
+  ["--surface-alternate", "#131316"],
+  ["--surface-sunken", "#1a1a1e"],
+  ["--text-primary", "#f4f4f5"],
+  ["--text-night", "#d4d4d8"],
+  ["--text-body", "#b4b4bc"],
+  ["--text-muted", "#8e8e97"],
+  ["--text-faint", "#71717a"],
+  ["--palette-border", "#27272a"],
+  ["--accent-primary", "#0ea5e9"],
+  ["--accent-strong", "#38bdf8"],
+  ["--accent-light", "#7dd3fc"],
+  ["--white", "#ffffff"],
+  ["--on-light-accent", "#06202e"],
+  ["--semantic-red", "#e81820"],
+  ["--semantic-red-text", "#ff6b70"],
+  ["--blue-band-start", "#041a2a"],
+  ["--blue-band-end", "#0b3350"],
+  ["--blue-band-text", "#bad5e6"],
+] as const
+
+const semanticTokens = [
+  ["--background", "--surface"],
+  ["--sidebar", "--surface"],
+  ["--foreground", "--text-primary"],
+  ["--card-foreground", "--text-primary"],
+  ["--popover-foreground", "--text-primary"],
+  ["--sidebar-foreground", "--text-primary"],
+  ["--card", "--surface-alternate"],
+  ["--secondary", "--surface-alternate"],
+  ["--sidebar-accent", "--surface-alternate"],
+  ["--popover", "--surface-sunken"],
+  ["--muted", "--surface-sunken"],
+  ["--muted-foreground", "--text-muted"],
+  ["--primary", "--accent-primary"],
+  ["--sidebar-primary", "--accent-primary"],
+  ["--primary-foreground", "--on-light-accent"],
+  ["--sidebar-primary-foreground", "--on-light-accent"],
+  ["--accent", "--accent-strong"],
+  ["--accent-foreground", "--on-light-accent"],
+  ["--destructive", "--semantic-red"],
+  ["--border", "--palette-border"],
+  ["--input", "--palette-border"],
+  ["--sidebar-border", "--palette-border"],
+  ["--ring", "--accent-strong"],
+  ["--sidebar-ring", "--accent-strong"],
+] as const
+
+function rootBlock() {
+  const blocks = source.match(/:root\s*\{[\s\S]*?\n\}/g)
+  expect(blocks).toHaveLength(1)
+  return blocks![0]
+}
+
+test(":root defines each Bethel AG primitive once and maps semantic tokens in one dark scheme", () => {
+  const root = rootBlock()
+
+  for (const [name, value] of primitives) {
+    expect(root).toMatch(new RegExp(`${name}:\\s*${value}(?![0-9a-fA-F])`, "i"))
+    expect(root.match(new RegExp(`${name}\\s*:`, "g"))).toHaveLength(1)
+    expect(source.match(new RegExp(`${name}\\s*:`, "g"))).toHaveLength(1)
+  }
+
+  for (const [token, primitive] of semanticTokens) {
+    expect(root).toMatch(new RegExp(`${token}:\\s*var\\(${primitive}\\)`, "i"))
+    expect(source.match(new RegExp(`${token}\\s*:`, "g"))).toHaveLength(1)
+  }
+
+  expect(root).toMatch(/color-scheme:\s*dark/)
+  expect(source.match(/color-scheme\s*:/g)).toHaveLength(1)
+  expect(source).not.toMatch(/color-scheme:\s*light/)
+  expect(source).not.toMatch(/prefers-color-scheme/)
+  expect(source).not.toMatch(/\.light\b/)
+  expect(source).not.toMatch(/\.dark\s*\{/)
+})
+
+test("chart series use distinct Bethel AG primitives", () => {
+  const root = rootBlock()
+  const primitiveNames = primitives.map(([name]) => name).join("|")
+  const charts = ["--chart-1", "--chart-2", "--chart-3", "--chart-4", "--chart-5"]
+  const used = charts.map((token) => {
+    const match = root.match(
+      new RegExp(`${token}:\\s*var\\((${primitiveNames})\\)`, "i"),
+    )
+    expect(match, token).not.toBeNull()
+    return match![1]
+  })
+
+  expect(new Set(used).size).toBe(charts.length)
+})
+
+test("legacy colour aliases and superseded opaque colours stay absent", () => {
+  for (const name of [
+    "--ink",
+    "--paper",
+    "--mist",
+    "--acid",
+    "--cobalt",
+    "--band",
+    "--band-ink",
+    "--band-link",
+  ]) {
+    expect(source).not.toMatch(new RegExp(`${name}(?![\\w-])`))
+  }
+
   expect(source).not.toMatch(/#d0af3b/i)
   expect(source).not.toMatch(/#020411/i)
   expect(source).not.toMatch(/mask-image:\s*radial-gradient/)
   expect(source).not.toMatch(/-webkit-mask-image:\s*radial-gradient/)
 })
 
-test("focus ring and current-page link use Acid; Menu at max-width 800px", () => {
-  expect(source).toMatch(/--ring:\s*var\(--acid\)|--ring:\s*#dee77f/i)
-  expect(source).toMatch(
-    /\.public-navigation a\[aria-current=["']page["']\][^}]*var\(--acid\)|\.public-navigation a\[aria-current=["']page["']\][^}]*#dee77f/i,
+test("every opaque colour is one Bethel AG primitive declaration", () => {
+  const allowed = new Set(primitives.map(([, value]) => value.toLowerCase()))
+  const expected = primitives.map(([, value]) => value.toLowerCase()).sort()
+  const opaque: string[] = []
+
+  for (const raw of source.match(/#[0-9a-fA-F]{3,8}\b/g) ?? []) {
+    const hex = raw.toLowerCase()
+    if (hex.length === 9 || hex.length === 5) {
+      const channels = hex.length === 9 ? hex.slice(1, 7) : [...hex.slice(1, 4)].map((channel) => channel + channel).join("")
+      expect(allowed.has(`#${channels}`), raw).toBe(true)
+      continue
+    }
+
+    const normalized =
+      hex.length === 4
+        ? `#${[...hex.slice(1)].map((channel) => channel + channel).join("")}`
+        : hex
+    expect(allowed.has(normalized), raw).toBe(true)
+    opaque.push(normalized)
+  }
+
+  expect(opaque.sort()).toEqual(expected)
+})
+
+const namedColours = [
+  "aliceblue", "antiquewhite", "aqua", "aquamarine", "azure", "beige", "bisque", "black",
+  "blanchedalmond", "blue", "blueviolet", "brown", "burlywood", "cadetblue", "chartreuse",
+  "chocolate", "coral", "cornflowerblue", "cornsilk", "crimson", "cyan", "darkblue",
+  "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkgrey", "darkkhaki",
+  "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred", "darksalmon",
+  "darkseagreen", "darkslateblue", "darkslategray", "darkslategrey", "darkturquoise",
+  "darkviolet", "deeppink", "deepskyblue", "dimgray", "dimgrey", "dodgerblue", "firebrick",
+  "floralwhite", "forestgreen", "fuchsia", "gainsboro", "ghostwhite", "gold", "goldenrod",
+  "gray", "green", "greenyellow", "grey", "honeydew", "hotpink", "indianred", "indigo",
+  "ivory", "khaki", "lavender", "lavenderblush", "lawngreen", "lemonchiffon", "lightblue",
+  "lightcoral", "lightcyan", "lightgoldenrodyellow", "lightgray", "lightgreen", "lightgrey",
+  "lightpink", "lightsalmon", "lightseagreen", "lightskyblue", "lightslategray",
+  "lightslategrey", "lightsteelblue", "lightyellow", "lime", "limegreen", "linen", "magenta",
+  "maroon", "mediumaquamarine", "mediumblue", "mediumorchid", "mediumpurple",
+  "mediumseagreen", "mediumslateblue", "mediumspringgreen", "mediumturquoise",
+  "mediumvioletred", "midnightblue", "mintcream", "mistyrose", "moccasin", "navajowhite",
+  "navy", "oldlace", "olive", "olivedrab", "orange", "orangered", "orchid", "palegoldenrod",
+  "palegreen", "paleturquoise", "palevioletred", "papayawhip", "peachpuff", "peru", "pink",
+  "plum", "powderblue", "purple", "rebeccapurple", "red", "rosybrown", "royalblue",
+  "saddlebrown", "salmon", "sandybrown", "seagreen", "seashell", "sienna", "silver",
+  "skyblue", "slateblue", "slategray", "slategrey", "snow", "springgreen", "steelblue",
+  "tan", "teal", "thistle", "tomato", "turquoise", "violet", "wheat", "white", "whitesmoke",
+  "yellow", "yellowgreen", "accentcolor", "accentcolortext", "activetext", "buttonborder",
+  "buttonface", "buttontext", "canvas", "canvastext", "fieldtext", "graytext", "highlighttext",
+  "linktext", "marktext", "selecteditem", "selecteditemtext", "visitedtext",
+].join("|")
+
+test("named colours and colour functions stay absent", () => {
+  const painted = source.replace(/\/\*[\s\S]*?\*\//g, "")
+  expect(painted).not.toMatch(
+    /(?<![\w-])(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color-mix|light-dark)\(/i,
   )
+  expect(painted).not.toMatch(/(?<![\w-])color\(/i)
+  expect(painted).not.toMatch(new RegExp(`(?<![\\w-])(?:${namedColours})(?![\\w-])`, "i"))
+})
+
+test("shared shell uses role tokens and sky-blue interaction states", () => {
+  expect(source).toMatch(/body\s*\{[^}]*bg-background/)
+  expect(source).toMatch(/body\s*\{[^}]*text-foreground/)
+  expect(source).toMatch(/\.site-header\s*\{[^}]*background:\s*var\(--background\)/)
+  expect(source).toMatch(/\.site-header\s*\{[^}]*border-bottom:[^;]*var\(--border\)/)
+  expect(source).toMatch(/\.site-footer\s*\{[^}]*background:\s*var\(--background\)/)
+  expect(source).toMatch(/\.site-footer\s*\{[^}]*border-top:[^;]*var\(--border\)/)
+  expect(source).toMatch(/\.public-navigation a\s*\{[^}]*color:\s*var\(--foreground\)/)
+  expect(source).toMatch(
+    /\.public-navigation a:hover,\s*\.public-navigation a\[aria-current="page"\]\s*\{[^}]*color:\s*var\(--accent-strong\)/,
+  )
+  expect(source).toMatch(/(?:^|\n)a\s*\{[^}]*color:\s*var\(--accent-light\)/)
+  expect(source).toMatch(/(?:^|\n)a:hover\s*\{[^}]*color:\s*var\(--accent-strong\)/)
+  expect(source).toMatch(/\.text-link,\s*\.section-link\s*\{[^}]*color:\s*var\(--accent-light\)/)
+  expect(source).toMatch(/\.text-link:hover,\s*\.section-link:hover\s*\{[^}]*color:\s*var\(--accent-strong\)/)
+  expect(source).toMatch(/::selection\s*\{[^}]*background:\s*var\(--primary\)[^}]*color:\s*var\(--primary-foreground\)/)
+  expect(source).toMatch(/:focus-visible\s*\{[^}]*outline:\s*2px solid var\(--ring\)[^}]*outline-offset:\s*6px/)
+  expect(source).toMatch(/scrollbar-color:\s*var\(--text-faint\)\s+var\(--surface\)/)
+  expect(source).toMatch(/::-webkit-scrollbar-track\s*\{[^}]*background:\s*var\(--surface\)/)
+  expect(source).toMatch(/::-webkit-scrollbar-thumb\s*\{[^}]*background:\s*var\(--text-faint\)/)
+  expect(source).toMatch(/\.skip-link\s*\{[^}]*background:\s*var\(--primary\)[^}]*color:\s*var\(--on-light-accent\)/)
+  expect(source).toMatch(
+    /\.skip-link:hover,\s*\.skip-link:active\s*\{[^}]*background:\s*var\(--accent-strong\)[^}]*color:\s*var\(--on-light-accent\)/,
+  )
+  expect(source).toMatch(/\.menu-toggle\s*\{[^}]*color:\s*var\(--foreground\)/)
+})
+
+test("error state uses semantic red text while the shell heading stays neutral", () => {
+  expect(source).toMatch(/\.shell-page h1\s*\{[^}]*color:\s*var\(--foreground\)/)
+  expect(source).not.toMatch(/\.shell-page h1\s*\{[^}]*semantic-red/)
+  expect(source).toMatch(
+    /\.shell-page\.error-state\s*\{[^}]*background:\s*var\(--surface\)[^}]*color:\s*var\(--text-primary\)/,
+  )
+  expect(source).toMatch(/\.shell-page\.error-state h1\s*\{[^}]*color:\s*var\(--semantic-red-text\)/)
+  expect(source).toMatch(/\.shell-page\.error-state \.text-link\s*\{[^}]*color:\s*var\(--accent-light\)/)
+  expect(source).toMatch(
+    /\.shell-page\.error-state \.text-link:hover\s*\{[^}]*color:\s*var\(--accent-strong\)/,
+  )
+})
+
+test("focus stays visible and the menu breakpoint is 800px", () => {
   expect(source).toMatch(/\.menu-toggle:focus\s*\{\s*display:\s*flex\s*;?\s*\}/)
   expect(source).toMatch(/@media\s*\(\s*max-width:\s*800px\s*\)/)
   expect(source).not.toMatch(/max-width:\s*63\.999rem/)
@@ -43,43 +237,9 @@ test("body is 16px / 1.6; display type is Oswald uppercase weight 500", () => {
   expect(source).toMatch(/--font-display/)
 })
 
-test("hero and sermon panel are Cobalt; New to HSG? visit is Band with Band ink and Band link", () => {
-  expect(source).toMatch(/\.hero[^{]*\{[^}]*background:\s*var\(--cobalt\)/)
-  expect(source).toMatch(/\.channel[^{]*\{[^}]*background:\s*var\(--cobalt\)/)
-  expect(source).not.toMatch(/\.channel[^{]*\{[^}]*background:\s*var\(--band\)/)
-  expect(source).not.toMatch(/\.playlists[^{]*\{[^}]*background:\s*var\(--band\)/)
-  expect(source).toMatch(/\.visit[^{]*\{[^}]*background:\s*var\(--band\)/)
-  expect(source).toMatch(/\.visit[^{]*\{[^}]*color:\s*var\(--band-ink\)/)
-  expect(source).toMatch(/\.visit[^{]*\{[^}]*--acid:\s*var\(--band-link\)/)
-  expect(source).toMatch(/\.visit[^{]*\{[^}]*--mist:\s*#424a4e/)
-  expect(source).toMatch(/\.visit[^{]*\{[^}]*--rule:\s*#a6aa9b/)
-  expect(source).toMatch(/\.visit\s+h2[^{]*\{[^}]*color:\s*var\(--band-ink\)/)
-  expect(source).toMatch(
-    /\.visit\s+a,\s*\.visit\s+\.text-link,\s*\.visit\s+\.section-link[^{]*\{[^}]*color:\s*var\(--band-link\)/,
-  )
-  expect(source).toMatch(/\.visit\s+\.source-note[^{]*\{[^}]*color:\s*var\(--mist\)/)
-  expect(source).toMatch(/\.service\s+\.time[^{]*\{[^}]*color:\s*var\(--acid\)/)
-  expect(source).not.toMatch(/\.visit[^{]*\{[^}]*background:\s*var\(--ink\)/)
+test("home testimony and stories regions stay out of the stylesheet", () => {
   expect(source).not.toMatch(/\.testimony-section\b/)
   expect(source).not.toMatch(/\.stories\b/)
-})
-
-test("home event highlights use ink-ground Home tokens, not the cream band", () => {
-  expect(source).toMatch(
-    /\.home-event-highlight-surface[^{]*\{[^}]*background:\s*var\(--cobalt\)/,
-  )
-  expect(source).toMatch(
-    /\.home-event-highlight-title[^{]*\{[^}]*color:\s*var\(--paper\)/,
-  )
-  expect(source).toMatch(
-    /\.home-event-play[^{]*\{[^}]*border-color:\s*transparent\s+transparent\s+transparent\s+var\(--paper\)/,
-  )
-  expect(source).not.toMatch(
-    /\.home-event-highlight-(?:rows|row|surface|title)[^{]*\{[^}]*background:\s*var\(--band\)/,
-  )
-  expect(source).not.toMatch(
-    /\.home-event-highlight-(?:rows|row|surface|title)[^{]*\{[^}]*color:\s*var\(--band-ink\)/,
-  )
 })
 
 test("wide region grids: hero two columns, event highlights two columns, sermons and visit beside", () => {
@@ -128,30 +288,155 @@ test("reference design strings stay out of the stylesheet", () => {
   expect(source).not.toMatch(/Design concept/)
 })
 
-test("Watch Featured Testimonies scripture block sits on band under .watch-page", () => {
+test("Watch scripture block stays scoped under .watch-page", () => {
   expect(source).toMatch(
     /\.watch-page\s+\.watch-scripture[^{]*\{[^}]*width:\s*100%/,
-  )
-  expect(source).toMatch(
-    /\.watch-page\s+\.watch-scripture[^{]*\{[^}]*background:\s*#c5c6b0/,
-  )
-  expect(source).toMatch(
-    /\.watch-page\s+\.watch-scripture-citation[^{]*\{[^}]*color:\s*var\(--band-ink\)/,
-  )
-  expect(source).toMatch(
-    /\.watch-page\s+\.watch-scripture-text[^{]*\{[^}]*color:\s*var\(--band-link\)/,
   )
   expect(source).not.toMatch(/(?<!\.watch-page\s+)\.watch-scripture\s*\{/)
 })
 
-test("timeline spine, tick, breakout, and sunday follow the reference with Home tokens", () => {
+const paintedSource = source.replace(/\/\*[\s\S]*?\*\//g, "")
+
+function normalizedSelector(selector: string) {
+  return selector.replace(/\s+/g, " ").trim()
+}
+
+function ruleBodies(selector: string) {
+  const want = normalizedSelector(selector)
+  const bodies: string[] = []
+  for (const match of paintedSource.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const selectors = match[1].split(",").map((part) => normalizedSelector(part))
+    if (selectors.includes(want)) bodies.push(match[2])
+  }
+  return bodies
+}
+
+function backgroundValues(body: string) {
+  return [...body.matchAll(/(?<![\w-])background(?:-color)?\s*:\s*([^;]+)/g)].map((match) =>
+    match[1].trim(),
+  )
+}
+
+const surfaceSections = [
+  ".home-page.page-width",
+  ".hero",
+  ".home-section",
+  ".visit",
+  ".about-page",
+  ".about-page .about-scenes",
+  ".about-page .scene",
+  ".about-page .copy",
+  ".give-page",
+  ".give-page .give-main",
+  ".give-page .give-why",
+  ".watch-page",
+  ".watch-page .watch-live",
+  ".watch-page .watch-testimonies",
+  ".watch-page .watch-sermon-rows",
+  ".contact-page",
+  ".contact-page .contact-main",
+  ".contact-page .contact-visit",
+  ".contact-page .contact-arrival",
+  ".contact-page .contact-strip",
+  ".timeline",
+  ".sunday",
+] as const
+
+const boundedSurfaces = [
+  [".portrait-field", ["var(--night)"]],
+  [".highlights li.scripture-tile", ["var(--surface-sunken)"]],
+  [".home-event-highlight-surface", ["var(--night)"]],
+  [".home-event-highlight-surface img", ["var(--night)"]],
+  [".playlists .channel", ["var(--surface-alternate)"]],
+  [".visit .service-records", ["var(--surface-alternate)"]],
+  [".about-page .plate", ["var(--night) center / cover no-repeat"]],
+  [".about-page #born-again .plate", ["var(--night)"]],
+  [".about-page #church .plate", ["var(--night)"]],
+  [".about-page .plate.band", ["var(--surface-alternate)"]],
+  [".give-page .give-scripture", ["var(--surface-alternate)"]],
+  [".give-page .give-help", ["var(--surface-alternate)"]],
+  [".give-page .give-cta", ["var(--accent-primary)"]],
+  [".give-page .give-cta:hover", ["var(--accent-strong)"]],
+  [".give-page .give-cta:active", ["var(--accent-strong)"]],
+  [".watch-page .watch-live img", ["var(--night)"]],
+  [".watch-page .watch-scripture", ["var(--surface-sunken)"]],
+  [".watch-page .watch-testimony-surface", ["var(--night)"]],
+  [".watch-page .watch-testimony-surface img", ["var(--night)"]],
+  [".watch-page .watch-sermon-scroller img", ["var(--night)"]],
+  [".contact-page .contact-arrival-list", ["var(--surface-alternate)"]],
+  [".contact-page .contact-directions", ["var(--accent-primary)"]],
+  [".contact-page .contact-directions:hover", ["var(--accent-strong)"]],
+  [".contact-page .contact-directions:active", ["var(--accent-strong)"]],
+  [".breakout", ["var(--surface-alternate)"]],
+  [".breakout .photo", ["var(--night)"]],
+  [".add-menu", ["var(--surface-sunken)"]],
+  [".sunday .add-menu", ["var(--surface-sunken)"]],
+] as const
+
+test("public route sections stay on Surface and bounded treatments use role tokens", () => {
+  for (const selector of surfaceSections) {
+    const values = ruleBodies(selector).flatMap(backgroundValues)
+    expect(values, selector).toEqual(["var(--surface)"])
+    for (const body of ruleBodies(selector)) {
+      expect(body, selector).not.toMatch(/var\(--(?:surface-alternate|surface-sunken|night|blue-band-)/)
+      expect(body, selector).not.toMatch(/linear-gradient/)
+    }
+  }
+
+  for (const [selector, expected] of boundedSurfaces) {
+    const values = ruleBodies(selector).flatMap(backgroundValues)
+    expect(values, selector).toEqual([...expected])
+  }
+
+  for (const selector of [
+    ".give-page .give-cta",
+    ".give-page .give-cta:hover",
+    ".give-page .give-cta:active",
+    ".contact-page .contact-directions",
+    ".contact-page .contact-directions:hover",
+    ".contact-page .contact-directions:active",
+  ]) {
+    const bodies = ruleBodies(selector).join("\n")
+    expect(bodies, selector).toMatch(/color:\s*var\(--on-light-accent\)/)
+    expect(bodies, selector).not.toMatch(/color:\s*var\(--white\)/)
+  }
+
+  expect(ruleBodies(".watch-page .watch-sermon-row-title").join("\n")).toMatch(
+    /color:\s*var\(--accent-light\)/,
+  )
+  expect(ruleBodies(".watch-page .watch-sermon-row-title a:hover").join("\n")).toMatch(
+    /color:\s*var\(--accent-strong\)/,
+  )
+  expect(ruleBodies(".add-menu").join("\n")).toMatch(
+    /border:\s*1px solid var\(--text-faint\)/,
+  )
+  expect(ruleBodies(".contact-page .contact-strip span").join("\n")).toMatch(
+    /color:\s*var\(--text-primary\)/,
+  )
+  expect(ruleBodies(".contact-page .contact-strip a").join("\n")).toMatch(
+    /color:\s*var\(--accent-light\)/,
+  )
+  expect(ruleBodies(".contact-page .contact-strip a").join("\n")).not.toMatch(
+    /color:\s*var\(--text-primary\)/,
+  )
+
+  const sectionSelector = new Set<string>(surfaceSections)
+  for (const match of paintedSource.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const selectors = match[1].split(",").map((part) => normalizedSelector(part))
+    const paintsBand = /var\(--blue-band-|linear-gradient/.test(match[2])
+    if (!paintsBand) continue
+    for (const selector of selectors) {
+      expect(sectionSelector.has(selector), selector).toBe(false)
+    }
+  }
+})
+
+test("timeline spine, tick, breakout, and sunday keep their structure", () => {
   expect(source).toMatch(/\.spine\s*\{/)
   expect(source).toMatch(/\.tick\s*\{/)
   expect(source).toMatch(/\.tick::before/)
   expect(source).toMatch(/\.breakout\s*\{/)
   expect(source).toMatch(/\.sunday\s*\{/)
-  expect(source).toMatch(/\.breakout[^}]*background:\s*var\(--cobalt\)/)
-  expect(source).toMatch(/\.sunday[^}]*background:\s*var\(--band\)/)
   expect(source).not.toMatch(/\.breakout[^}]*border-radius|\.breakout[^}]*box-shadow/)
   expect(source).toMatch(/\.add summary[^}]*min-height:\s*44px/)
   expect(source).toMatch(/\.add-menu a[^}]*min-height:\s*44px/)

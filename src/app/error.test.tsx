@@ -5,6 +5,8 @@ import { createElement, type ComponentType } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { expect, test, vi } from "vitest"
 
+import NotFound from "./not-found"
+
 vi.mock("next/link", () => ({
   default: function Link({
     href,
@@ -62,6 +64,18 @@ test("renders unexpected-error copy, actions, title, and main landmark", () => {
   expect(html).toMatch(
     /<main[^>]*id="main-content"[^>]*class="[^"]*\bpage-width\b[^"]*"[^>]*tabindex="-1"/i,
   )
+})
+
+test("marks the error shell and keeps the not-found shell neutral", () => {
+  const html = renderError(new Error("secret-marker"))
+  const notFoundHtml = renderToStaticMarkup(createElement(NotFound))
+
+  expect(html).toMatch(/\berror-state\b/)
+  expect(html).toMatch(/<button[^>]*class="text-link"/)
+  expect(html).toMatch(/<a[^>]*href="\/"[^>]*class="text-link"/)
+  expect(notFoundHtml).not.toMatch(/\berror-state\b/)
+  expect(notFoundHtml).toMatch(/<a[^>]*href="\/"[^>]*class="text-link"/)
+  expect(notFoundHtml).toContain("Page not found")
 })
 
 test("never renders error message, name, or digest", () => {
