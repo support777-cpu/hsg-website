@@ -20,6 +20,7 @@ Skills: `.agents/skills/capture-intent/SKILL.md`, `.agents/skills/write-spec/SKI
 | improvement | error-handling-model-and-audit | Error handling model and audit | ready | [intent](improvements/error-handling-model-and-audit/intent.md) | [spec](improvements/error-handling-model-and-audit/spec.md) | — | [plan](improvements/error-handling-model-and-audit/plan.md) |
 | improvement | event-highlights-and-scripture-relocation | Event highlights and scripture relocation | ready | [intent](improvements/event-highlights-and-scripture-relocation/intent.md) | [spec](improvements/event-highlights-and-scripture-relocation/spec.md) | — | [plan](improvements/event-highlights-and-scripture-relocation/plan.md) |
 | improvement | home-events-and-scripture-tiles | Home events and scripture tiles | ready | [intent](improvements/home-events-and-scripture-tiles/intent.md) | [spec](improvements/home-events-and-scripture-tiles/spec.md) | — | [plan](improvements/home-events-and-scripture-tiles/plan.md) |
+| improvement | unified-bethel-ag-colour-scheme | Unified Bethel AG colour scheme | draft | [intent](improvements/unified-bethel-ag-colour-scheme/intent.md) | [spec](improvements/unified-bethel-ag-colour-scheme/spec.md) | — | [plan](improvements/unified-bethel-ag-colour-scheme/plan.md) |
 | improvement | youtube-playlist-snapshots | YouTube playlist snapshots | draft | [intent](improvements/youtube-playlist-snapshots/intent.md) | — | — | — |
 
 ## Design references
