@@ -108,19 +108,25 @@ function contactTabletStackBlock(css: string): string {
 
 test("Contact panels stay clipped to the page base at tablet-owned widths", () => {
   expect(globalsSource).toMatch(
-    /\.contact-page\s*\{[^}]*overflow:\s*clip[^}]*background:\s*var\(--surface\)/,
+    /\.contact-page\s*\{[^}]*overflow:\s*clip[^}]*background:\s*transparent/,
   )
   expect(globalsSource).toMatch(
-    /\.contact-page\s+\.contact-visit\s*\{[^}]*background:\s*var\(--surface\)/,
+    /\.contact-page\s+\.contact-visit\s*\{[^}]*background:\s*transparent/,
   )
   expect(globalsSource).toMatch(
-    /\.contact-page\s+\.contact-arrival\s*\{[^}]*background:\s*var\(--surface\)/,
+    /\.contact-page\s+\.contact-arrival\s*\{[^}]*background:\s*transparent/,
   )
   expect(globalsSource).toMatch(
-    /\.contact-page\s+\.contact-strip\s*\{[^}]*background:\s*var\(--surface\)/,
+    /\.contact-page\s+\.contact-strip\s*\{[^}]*background:\s*transparent/,
   )
   expect(globalsSource).toMatch(
-    /\.contact-page\s+\.contact-arrival-list\s*\{[^}]*background:\s*var\(--surface-alternate\)/,
+    /\.contact-page\s+\.contact-arrival-list\s*\{[^}]*background:\s*transparent/,
+  )
+  expect(globalsSource).toMatch(
+    /\.contact-page\s+\.contact-arrival-list li\s*\{[^}]*border-top:\s*1px solid var\(--accent-primary\)/,
+  )
+  expect(globalsSource).toMatch(
+    /\.contact-page\s+\.contact-arrival-list li:last-child\s*\{[^}]*border-bottom:\s*1px solid var\(--accent-primary\)/,
   )
   expect(globalsSource).toMatch(
     /\.contact-page\s+\.contact-directions\s*\{[^}]*background:\s*var\(--accent-primary\)[^}]*color:\s*var\(--on-light-accent\)/,

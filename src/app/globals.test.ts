@@ -17,6 +17,7 @@ const primitives = [
   ["--text-faint", "#71717a"],
   ["--palette-border", "#27272a"],
   ["--accent-primary", "#0ea5e9"],
+  ["--accent-deep", "#0284c7"],
   ["--accent-strong", "#38bdf8"],
   ["--accent-light", "#7dd3fc"],
   ["--white", "#ffffff"],
@@ -26,6 +27,8 @@ const primitives = [
   ["--blue-band-start", "#041a2a"],
   ["--blue-band-end", "#0b3350"],
   ["--blue-band-text", "#bad5e6"],
+  ["--frost-start", "#000428"],
+  ["--frost-end", "#004e92"],
 ] as const
 
 const semanticTokens = [
@@ -182,18 +185,18 @@ test("named colours and colour functions stay absent", () => {
 test("shared shell uses role tokens and sky-blue interaction states", () => {
   expect(source).toMatch(/body\s*\{[^}]*bg-background/)
   expect(source).toMatch(/body\s*\{[^}]*text-foreground/)
-  expect(source).toMatch(/\.site-header\s*\{[^}]*background:\s*var\(--background\)/)
+  expect(source).toMatch(/\.site-header\s*\{[^}]*background:\s*var\(--night\)/)
   expect(source).toMatch(/\.site-header\s*\{[^}]*border-bottom:[^;]*var\(--border\)/)
-  expect(source).toMatch(/\.site-footer\s*\{[^}]*background:\s*var\(--background\)/)
+  expect(source).toMatch(/\.site-footer\s*\{[^}]*background:\s*var\(--night\)/)
   expect(source).toMatch(/\.site-footer\s*\{[^}]*border-top:[^;]*var\(--border\)/)
   expect(source).toMatch(/\.public-navigation a\s*\{[^}]*color:\s*var\(--foreground\)/)
   expect(source).toMatch(
-    /\.public-navigation a:hover,\s*\.public-navigation a\[aria-current="page"\]\s*\{[^}]*color:\s*var\(--accent-strong\)/,
+    /\.public-navigation a:hover,\s*\.public-navigation a\[aria-current="page"\]\s*\{[^}]*color:\s*var\(--accent-primary\)/,
   )
-  expect(source).toMatch(/(?:^|\n)a\s*\{[^}]*color:\s*var\(--accent-light\)/)
-  expect(source).toMatch(/(?:^|\n)a:hover\s*\{[^}]*color:\s*var\(--accent-strong\)/)
-  expect(source).toMatch(/\.text-link,\s*\.section-link\s*\{[^}]*color:\s*var\(--accent-light\)/)
-  expect(source).toMatch(/\.text-link:hover,\s*\.section-link:hover\s*\{[^}]*color:\s*var\(--accent-strong\)/)
+  expect(source).toMatch(/(?:^|\n)a\s*\{[^}]*color:\s*var\(--accent-primary\)/)
+  expect(source).toMatch(/(?:^|\n)a:hover\s*\{[^}]*color:\s*var\(--accent-deep\)/)
+  expect(source).toMatch(/\.text-link,\s*\.section-link\s*\{[^}]*color:\s*var\(--accent-primary\)/)
+  expect(source).toMatch(/\.text-link:hover,\s*\.section-link:hover\s*\{[^}]*color:\s*var\(--accent-deep\)/)
   expect(source).toMatch(/::selection\s*\{[^}]*background:\s*var\(--primary\)[^}]*color:\s*var\(--primary-foreground\)/)
   expect(source).toMatch(/:focus-visible\s*\{[^}]*outline:\s*2px solid var\(--ring\)[^}]*outline-offset:\s*6px/)
   expect(source).toMatch(/scrollbar-color:\s*var\(--text-faint\)\s+var\(--surface\)/)
@@ -206,16 +209,16 @@ test("shared shell uses role tokens and sky-blue interaction states", () => {
   expect(source).toMatch(/\.menu-toggle\s*\{[^}]*color:\s*var\(--foreground\)/)
 })
 
-test("error state uses semantic red text while the shell heading stays neutral", () => {
-  expect(source).toMatch(/\.shell-page h1\s*\{[^}]*color:\s*var\(--foreground\)/)
+test("error state uses semantic red text while the shell heading stays blue", () => {
+  expect(source).toMatch(/\.shell-page h1\s*\{[^}]*color:\s*var\(--accent-light\)/)
   expect(source).not.toMatch(/\.shell-page h1\s*\{[^}]*semantic-red/)
   expect(source).toMatch(
-    /\.shell-page\.error-state\s*\{[^}]*background:\s*var\(--surface\)[^}]*color:\s*var\(--text-primary\)/,
+    /\.shell-page\.error-state\s*\{[^}]*background:\s*transparent[^}]*color:\s*var\(--text-primary\)/,
   )
   expect(source).toMatch(/\.shell-page\.error-state h1\s*\{[^}]*color:\s*var\(--semantic-red-text\)/)
-  expect(source).toMatch(/\.shell-page\.error-state \.text-link\s*\{[^}]*color:\s*var\(--accent-light\)/)
+  expect(source).toMatch(/\.shell-page\.error-state \.text-link\s*\{[^}]*color:\s*var\(--accent-primary\)/)
   expect(source).toMatch(
-    /\.shell-page\.error-state \.text-link:hover\s*\{[^}]*color:\s*var\(--accent-strong\)/,
+    /\.shell-page\.error-state \.text-link:hover\s*\{[^}]*color:\s*var\(--accent-deep\)/,
   )
 })
 
@@ -326,9 +329,6 @@ const surfaceSections = [
   ".about-page .about-scenes",
   ".about-page .scene",
   ".about-page .copy",
-  ".give-page",
-  ".give-page .give-main",
-  ".give-page .give-why",
   ".watch-page",
   ".watch-page .watch-live",
   ".watch-page .watch-testimonies",
@@ -336,7 +336,6 @@ const surfaceSections = [
   ".contact-page",
   ".contact-page .contact-main",
   ".contact-page .contact-visit",
-  ".contact-page .contact-arrival",
   ".contact-page .contact-strip",
   ".timeline",
   ".sunday",
@@ -344,30 +343,34 @@ const surfaceSections = [
 
 const boundedSurfaces = [
   [".portrait-field", ["var(--night)"]],
-  [".highlights li.scripture-tile", ["var(--surface-sunken)"]],
+  [".highlights li.scripture-tile", ["var(--blue-band-start)"]],
   [".home-event-highlight-surface", ["var(--night)"]],
   [".home-event-highlight-surface img", ["var(--night)"]],
-  [".playlists .channel", ["var(--surface-alternate)"]],
-  [".visit .service-records", ["var(--surface-alternate)"]],
+  [".playlists .channel", ["var(--blue-band-start)"]],
+  [".visit .service-records", ["transparent"]],
   [".about-page .plate", ["var(--night) center / cover no-repeat"]],
   [".about-page #born-again .plate", ["var(--night)"]],
   [".about-page #church .plate", ["var(--night)"]],
-  [".about-page .plate.band", ["var(--surface-alternate)"]],
-  [".give-page .give-scripture", ["var(--surface-alternate)"]],
-  [".give-page .give-help", ["var(--surface-alternate)"]],
+  [".about-page .plate.band", ["transparent"]],
+  [".give-page", ["transparent"]],
+  [".give-page .give-main", ["transparent"]],
+  [".give-page .give-scripture", ["transparent"]],
+  [".give-page .give-why", ["transparent"]],
+  [".give-page .give-help", ["transparent"]],
   [".give-page .give-cta", ["var(--accent-primary)"]],
   [".give-page .give-cta:hover", ["var(--accent-strong)"]],
   [".give-page .give-cta:active", ["var(--accent-strong)"]],
   [".watch-page .watch-live img", ["var(--night)"]],
-  [".watch-page .watch-scripture", ["var(--surface-sunken)"]],
+  [".watch-page .watch-scripture", ["var(--blue-band-start)"]],
   [".watch-page .watch-testimony-surface", ["var(--night)"]],
   [".watch-page .watch-testimony-surface img", ["var(--night)"]],
   [".watch-page .watch-sermon-scroller img", ["var(--night)"]],
-  [".contact-page .contact-arrival-list", ["var(--surface-alternate)"]],
+  [".contact-page .contact-arrival", ["transparent"]],
+  [".contact-page .contact-arrival-list", ["transparent"]],
   [".contact-page .contact-directions", ["var(--accent-primary)"]],
   [".contact-page .contact-directions:hover", ["var(--accent-strong)"]],
   [".contact-page .contact-directions:active", ["var(--accent-strong)"]],
-  [".breakout", ["var(--surface-alternate)"]],
+  [".breakout", ["var(--blue-band-start)"]],
   [".breakout .photo", ["var(--night)"]],
   [".add-menu", ["var(--surface-sunken)"]],
   [".sunday .add-menu", ["var(--surface-sunken)"]],
@@ -376,7 +379,7 @@ const boundedSurfaces = [
 test("public route sections stay on Surface and bounded treatments use role tokens", () => {
   for (const selector of surfaceSections) {
     const values = ruleBodies(selector).flatMap(backgroundValues)
-    expect(values, selector).toEqual(["var(--surface)"])
+    expect(values, selector).toEqual(["transparent"])
     for (const body of ruleBodies(selector)) {
       expect(body, selector).not.toMatch(/var\(--(?:surface-alternate|surface-sunken|night|blue-band-)/)
       expect(body, selector).not.toMatch(/linear-gradient/)
@@ -405,7 +408,7 @@ test("public route sections stay on Surface and bounded treatments use role toke
     /color:\s*var\(--accent-light\)/,
   )
   expect(ruleBodies(".watch-page .watch-sermon-row-title a:hover").join("\n")).toMatch(
-    /color:\s*var\(--accent-strong\)/,
+    /color:\s*var\(--accent-deep\)/,
   )
   expect(ruleBodies(".add-menu").join("\n")).toMatch(
     /border:\s*1px solid var\(--text-faint\)/,
@@ -414,7 +417,7 @@ test("public route sections stay on Surface and bounded treatments use role toke
     /color:\s*var\(--text-primary\)/,
   )
   expect(ruleBodies(".contact-page .contact-strip a").join("\n")).toMatch(
-    /color:\s*var\(--accent-light\)/,
+    /color:\s*var\(--accent-primary\)/,
   )
   expect(ruleBodies(".contact-page .contact-strip a").join("\n")).not.toMatch(
     /color:\s*var\(--text-primary\)/,

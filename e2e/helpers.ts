@@ -5,14 +5,17 @@ export const bethel = {
   surface: "rgb(12, 12, 14)",
   surfaceAlternate: "rgb(19, 19, 22)",
   surfaceSunken: "rgb(26, 26, 30)",
+  blueBandStart: "rgb(4, 26, 42)",
   night: "rgb(0, 0, 0)",
   textPrimary: "rgb(244, 244, 245)",
   accentPrimary: "rgb(14, 165, 233)",
+  accentDeep: "rgb(2, 132, 199)",
   accentStrong: "rgb(56, 189, 248)",
   accentLight: "rgb(125, 211, 252)",
   onLightAccent: "rgb(6, 32, 46)",
   textFaint: "rgb(113, 113, 122)",
   semanticRedText: "rgb(255, 107, 112)",
+  clear: "rgba(0, 0, 0, 0)",
 } as const
 
 export const desktop = { width: 1280, height: 900 }

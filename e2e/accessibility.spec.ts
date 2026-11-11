@@ -47,9 +47,8 @@ const surfaceRoutes = [
   {
     path: "/contact",
     footer: false,
-    selectors: [".contact-page", ".contact-visit", ".contact-arrival", ".contact-strip"],
+    selectors: [".contact-page", ".contact-visit", ".contact-strip"],
   },
-  { path: "/give", footer: true, selectors: [".give-page", ".give-main", ".give-why"] },
 ] as const
 
 async function expectSurface(page: Page, selector: string) {
@@ -57,7 +56,7 @@ async function expectSurface(page: Page, selector: string) {
   const count = await locators.count()
   expect(count, selector).toBeGreaterThan(0)
   for (let index = 0; index < count; index += 1) {
-    await expect(locators.nth(index)).toHaveCSS("background-color", bethel.surface)
+    await expect(locators.nth(index)).toHaveCSS("background-color", bethel.clear)
   }
 }
 
@@ -83,9 +82,9 @@ test("paints the shell and major sections with Surface at phone, tablet, and des
     for (const route of surfaceRoutes) {
       await page.goto(route.path)
       await expect(page.locator("body")).toHaveCSS("background-color", bethel.surface)
-      await expect(page.getByRole("banner")).toHaveCSS("background-color", bethel.surface)
+      await expect(page.getByRole("banner")).toHaveCSS("background-color", bethel.night)
       if (route.footer) {
-        await expect(page.getByRole("contentinfo")).toHaveCSS("background-color", bethel.surface)
+        await expect(page.getByRole("contentinfo")).toHaveCSS("background-color", bethel.night)
       } else {
         await expect(page.locator("footer.site-footer")).toHaveCount(0)
       }
@@ -126,41 +125,41 @@ test("uses Bethel AG accent, on-accent, bounded, media, and semantic colours", a
   await expect(page.locator("body")).toHaveCSS("font-size", "16px")
   await expect(page.getByRole("heading", { level: 1 })).toHaveCSS("text-transform", "uppercase")
   await expect(page.getByRole("heading", { level: 1 })).toHaveCSS("font-weight", "500")
-  await expect(page.getByRole("heading", { level: 1 })).toHaveCSS("color", bethel.textPrimary)
+  await expect(page.getByRole("heading", { level: 1 })).toHaveCSS("color", bethel.accentLight)
 
   const headingFont = await page.getByRole("heading", { level: 1 }).evaluate((el) => getComputedStyle(el).fontFamily)
   const bodyFont = await page.locator("body").evaluate((el) => getComputedStyle(el).fontFamily)
   expect(headingFont).toMatch(/oswald/i)
   expect(bodyFont).toMatch(/dm[_\s]?sans/i)
 
-  await expect(page.getByRole("region", { name: sections[0] })).toHaveCSS("background-color", bethel.surface)
+  await expect(page.getByRole("region", { name: sections[0] })).toHaveCSS("background-color", bethel.clear)
   await expect(page.getByRole("region", { name: sections[0] }).getByRole("link", { name: "Events" })).toHaveCSS(
     "color",
-    bethel.accentLight,
+    bethel.accentPrimary,
   )
   await expect(page.locator(".highlights li.scripture-tile")).toHaveCSS(
     "background-color",
-    bethel.surfaceSunken,
+    bethel.blueBandStart,
   )
   await expect(page.locator(".home-event-highlight-surface").first()).toHaveCSS(
     "background-color",
     bethel.night,
   )
   await expect(page.locator(".portrait-field")).toHaveCSS("background-color", bethel.night)
-  await expect(firstSermonVideo(page)).toHaveCSS("color", bethel.accentLight)
-  await expect(page.getByRole("region", { name: "Sermons" })).toHaveCSS("background-color", bethel.surface)
+  await expect(firstSermonVideo(page)).toHaveCSS("color", bethel.accentPrimary)
+  await expect(page.getByRole("region", { name: "Sermons" })).toHaveCSS("background-color", bethel.clear)
   await expect(page.locator(".playlists .channel")).toHaveCSS(
     "background-color",
-    bethel.surfaceAlternate,
+    bethel.blueBandStart,
   )
 
   const visitRegion = page.getByRole("region", { name: "New to HSG?" })
-  await expect(visitRegion).toHaveCSS("background-color", bethel.surface)
+  await expect(visitRegion).toHaveCSS("background-color", bethel.clear)
   await expect(visitRegion.locator(".service-records")).toHaveCSS(
     "background-color",
-    bethel.surfaceAlternate,
+    bethel.clear,
   )
-  await expect(visitRegion.getByRole("heading", { level: 2 })).toHaveCSS("color", bethel.textPrimary)
+  await expect(visitRegion.getByRole("heading", { level: 2 })).toHaveCSS("color", bethel.accentLight)
   await expect(visitRegion.getByText(sundayServices[0]!.time)).toHaveCSS("color", bethel.textPrimary)
 
   await page.keyboard.press("Tab")
@@ -171,27 +170,27 @@ test("uses Bethel AG accent, on-accent, bounded, media, and semantic colours", a
   await expect(skip).toHaveCSS("outline-color", bethel.accentStrong)
 
   await page.goto("/about")
-  await expect(headerNav(page).getByRole("link", { name: "About" })).toHaveCSS("color", bethel.accentStrong)
+  await expect(headerNav(page).getByRole("link", { name: "About" })).toHaveCSS("color", bethel.accentPrimary)
   await expect(page.locator("#born-again [role='img']")).toHaveCSS("background-color", bethel.night)
   await expect(page.locator("#church [role='img']")).toHaveCSS("background-color", bethel.night)
-  await expect(page.locator("#story-continues")).toHaveCSS("background-color", bethel.surface)
+  await expect(page.locator("#story-continues")).toHaveCSS("background-color", bethel.clear)
   await expect(page.locator("#story-continues .plate")).toHaveCSS(
     "background-color",
-    bethel.surfaceAlternate,
+    bethel.clear,
   )
 
   await page.goto("/watch")
   await expect(headerNav(page).getByRole("link", { name: "Watch", exact: true })).toHaveCSS(
     "color",
-    bethel.accentStrong,
+    bethel.accentPrimary,
   )
-  await expect(page.locator(".watch-testimonies")).toHaveCSS("background-color", bethel.surface)
-  await expect(page.locator(".watch-scripture")).toHaveCSS("background-color", bethel.surfaceSunken)
+  await expect(page.locator(".watch-testimonies")).toHaveCSS("background-color", bethel.clear)
+  await expect(page.locator(".watch-scripture")).toHaveCSS("background-color", bethel.blueBandStart)
   await expect(page.locator(".watch-testimony-surface").first()).toHaveCSS(
     "background-color",
     bethel.night,
   )
-  await expect(page.locator(".watch-sermon-rows")).toHaveCSS("background-color", bethel.surface)
+  await expect(page.locator(".watch-sermon-rows")).toHaveCSS("background-color", bethel.clear)
 
   await page.goto("/give")
   const give = page.getByRole("link", { name: giveCta.label, exact: true })
@@ -200,9 +199,13 @@ test("uses Bethel AG accent, on-accent, bounded, media, and semantic colours", a
   await give.hover()
   await expect(give).toHaveCSS("background-color", bethel.accentStrong)
   await expect(give).toHaveCSS("color", bethel.onLightAccent)
-  await expect(page.locator(".give-scripture")).toHaveCSS("background-color", bethel.surfaceAlternate)
-  await expect(page.locator(".give-why")).toHaveCSS("background-color", bethel.surface)
-  await expect(page.locator(".give-help")).toHaveCSS("background-color", bethel.surfaceAlternate)
+  await expect(page.locator("body")).toHaveCSS("background-color", bethel.surface)
+  await expect(page.locator(".give-page")).toHaveCSS("background-color", bethel.clear)
+  await expect(page.locator(".give-main")).toHaveCSS("background-color", bethel.clear)
+  await expect(page.locator(".give-scripture")).toHaveCSS("background-color", bethel.clear)
+  await expect(page.locator(".give-why")).toHaveCSS("background-color", bethel.clear)
+  await expect(page.locator(".give-help")).toHaveCSS("background-color", bethel.clear)
+  await expect(page.getByRole("contentinfo")).toHaveCSS("background-color", bethel.night)
 
   await page.goto("/contact")
   const directions = page.getByRole("link", { name: visit.directions.label })
@@ -211,16 +214,17 @@ test("uses Bethel AG accent, on-accent, bounded, media, and semantic colours", a
   await directions.hover()
   await expect(directions).toHaveCSS("background-color", bethel.accentStrong)
   await expect(directions).toHaveCSS("color", bethel.onLightAccent)
-  await expect(page.locator(".contact-arrival")).toHaveCSS("background-color", bethel.surface)
-  await expect(page.locator(".contact-arrival-list")).toHaveCSS(
-    "background-color",
-    bethel.surfaceAlternate,
+  await expect(page.locator(".contact-arrival")).toHaveCSS("background-color", bethel.clear)
+  await expect(page.locator(".contact-arrival-list")).toHaveCSS("background-color", bethel.clear)
+  await expect(page.locator(".contact-arrival-list li").first()).toHaveCSS(
+    "border-top-color",
+    bethel.accentPrimary,
   )
-  await expect(page.locator(".contact-strip")).toHaveCSS("background-color", bethel.surface)
+  await expect(page.locator(".contact-strip")).toHaveCSS("background-color", bethel.clear)
 
   await page.goto("/events")
-  await expect(page.locator(".timeline")).toHaveCSS("background-color", bethel.surface)
-  await expect(page.locator(".sunday")).toHaveCSS("background-color", bethel.surface)
+  await expect(page.locator(".timeline")).toHaveCSS("background-color", bethel.clear)
+  await expect(page.locator(".sunday")).toHaveCSS("background-color", bethel.clear)
   await page.getByLabel(`Add to calendar, ${sundayServices[0]!.title}, every Sunday`).click()
   const calendarMenu = page.locator(".sunday .add-menu").first()
   await expect(calendarMenu).toHaveCSS("background-color", bethel.surfaceSunken)

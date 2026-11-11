@@ -42,9 +42,11 @@ test("document title is Events; h1 Events; no IST note or placeholders", () => {
 
 test("featured rows use a bounded breakout with h2, when-line, optional description and photo, then scope", () => {
   expect(source).toMatch(/className=["'][^"']*breakout/)
-  expect(globalsSource).toMatch(/\.timeline\s*\{[^}]*background:\s*var\(--surface\)/)
-  expect(globalsSource).toMatch(/\.sunday\s*\{[^}]*background:\s*var\(--surface\)/)
-  expect(globalsSource).toMatch(/\.breakout\s*\{[^}]*background:\s*var\(--surface-alternate\)/)
+  expect(globalsSource).toMatch(/\.timeline\s*\{[^}]*background:\s*transparent/)
+  expect(globalsSource).toMatch(/\.sunday\s*\{[^}]*background:\s*transparent/)
+  expect(globalsSource).toMatch(
+    /\.breakout\s*\{[^}]*background-color:\s*var\(--blue-band-start\)[^}]*background-image:\s*var\(--blue-band-gradient\)/,
+  )
   expect(globalsSource).toMatch(/\.breakout\s+\.photo\s*\{[^}]*background:\s*var\(--night\)/)
   expect(globalsSource).toMatch(/\.add-menu\s*\{[^}]*background:\s*var\(--surface-sunken\)/)
   expect(globalsSource).toMatch(

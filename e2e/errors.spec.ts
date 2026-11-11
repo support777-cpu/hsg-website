@@ -50,9 +50,11 @@ test("not-found page does not scroll sideways at 320px", async ({ page }) => {
 })
 
 const surface = "rgb(12, 12, 14)"
+const night = "rgb(0, 0, 0)"
 const textPrimary = "rgb(244, 244, 245)"
 const semanticRedText = "rgb(255, 107, 112)"
 const accentLight = "rgb(125, 211, 252)"
+const accentDeep = "rgb(2, 132, 199)"
 const accentStrong = "rgb(56, 189, 248)"
 const accentPrimary = "rgb(14, 165, 233)"
 const onLightAccent = "rgb(6, 32, 46)"
@@ -66,15 +68,15 @@ test("not-found stays neutral on Surface while the error state uses semantic red
   const main = page.getByRole("main")
   await expect(main).not.toHaveClass(/error-state/)
   await expect(page.locator("body")).toHaveCSS("background-color", surface)
-  await expect(page.getByRole("banner")).toHaveCSS("background-color", surface)
-  await expect(page.getByRole("contentinfo")).toHaveCSS("background-color", surface)
-  await expect(page.getByRole("heading", { level: 1 })).toHaveCSS("color", textPrimary)
+  await expect(page.getByRole("banner")).toHaveCSS("background-color", night)
+  await expect(page.getByRole("contentinfo")).toHaveCSS("background-color", night)
+  await expect(page.getByRole("heading", { level: 1 })).toHaveCSS("color", accentLight)
   await expect(page.getByRole("heading", { level: 1 })).not.toHaveCSS("color", semanticRedText)
 
   const home = page.getByRole("link", { name: "Return to Home" })
-  await expect(home).toHaveCSS("color", accentLight)
+  await expect(home).toHaveCSS("color", accentPrimary)
   await home.hover()
-  await expect(home).toHaveCSS("color", accentStrong)
+  await expect(home).toHaveCSS("color", accentDeep)
 
   const skip = page.getByRole("link", { name: "Skip to main content" })
   await skip.focus()
@@ -94,11 +96,11 @@ test("not-found stays neutral on Surface while the error state uses semantic red
   })
 
   const probe = page.locator("#error-state-probe")
-  await expect(probe).toHaveCSS("background-color", surface)
+  await expect(probe).toHaveCSS("background-color", "rgba(0, 0, 0, 0)")
   await expect(probe).toHaveCSS("color", textPrimary)
   await expect(probe.getByRole("heading", { level: 1 })).toHaveCSS("color", semanticRedText)
   const recovery = probe.getByRole("link", { name: "Return to Home" })
-  await expect(recovery).toHaveCSS("color", accentLight)
+  await expect(recovery).toHaveCSS("color", accentPrimary)
   await recovery.hover()
-  await expect(recovery).toHaveCSS("color", accentStrong)
+  await expect(recovery).toHaveCSS("color", accentDeep)
 })

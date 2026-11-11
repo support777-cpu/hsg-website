@@ -66,21 +66,21 @@ test("external item links open in a new tab; items without href are plain text",
 
 test("sermons put intro and scripture in the channel panel; no iframe or banned tagline", () => {
   expect(source).toMatch(/className=["'][^"']*\bchannel\b/)
-  expect(globalsSource).toMatch(/\.hero\s*\{[^}]*background:\s*var\(--surface\)/)
-  expect(globalsSource).toMatch(/\.home-section\s*\{[^}]*background:\s*var\(--surface\)/)
-  expect(globalsSource).toMatch(/\.visit\s*\{[^}]*background:\s*var\(--surface\)/)
+  expect(globalsSource).toMatch(/\.hero\s*\{[^}]*background:\s*transparent/)
+  expect(globalsSource).toMatch(/\.home-section\s*\{[^}]*background:\s*transparent/)
+  expect(globalsSource).toMatch(/\.visit\s*\{[^}]*background:\s*transparent/)
   expect(globalsSource).toMatch(/\.portrait-field\s*\{[^}]*background:\s*var\(--night\)/)
   expect(globalsSource).toMatch(
-    /\.highlights\s+li\.scripture-tile\s*\{[^}]*background:\s*var\(--surface-sunken\)/,
+    /\.highlights\s+li\.scripture-tile\s*\{[^}]*background-color:\s*var\(--blue-band-start\)[^}]*background-image:\s*var\(--blue-band-gradient\)/,
   )
   expect(globalsSource).toMatch(
     /\.home-event-highlight-surface\s*\{[^}]*background:\s*var\(--night\)/,
   )
   expect(globalsSource).toMatch(
-    /\.playlists\s+\.channel\s*\{[^}]*background:\s*var\(--surface-alternate\)/,
+    /\.playlists\s+\.channel\s*\{[^}]*background-color:\s*var\(--blue-band-start\)[^}]*background-image:\s*var\(--blue-band-gradient\)/,
   )
   expect(globalsSource).toMatch(
-    /\.visit\s+\.service-records\s*\{[^}]*background:\s*var\(--surface-alternate\)/,
+    /\.visit\s+\.service-records\s*\{[^}]*background:\s*transparent/,
   )
   expect(source).toMatch(/section\.intro/)
   expect(source).not.toMatch(/<iframe\b/)
