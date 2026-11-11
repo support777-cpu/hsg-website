@@ -4,6 +4,7 @@ import { join } from "node:path"
 import { expect, test } from "vitest"
 
 const source = readFileSync(join(import.meta.dirname, "page.tsx"), "utf8")
+const globalsSource = readFileSync(join(import.meta.dirname, "globals.css"), "utf8")
 const repoRoot = join(import.meta.dirname, "../..")
 
 test("h1 accessible name is Holy Spirit Generation on two lines, not leader.name", () => {
@@ -63,8 +64,24 @@ test("external item links open in a new tab; items without href are plain text",
   expect(source).toMatch(/rel=["']noopener noreferrer["']/)
 })
 
-test("sermons put intro and first item in cobalt panel; no iframe or banned tagline", () => {
-  expect(source).toMatch(/channel|sermon-panel|cobalt/i)
+test("sermons put intro and scripture in the channel panel; no iframe or banned tagline", () => {
+  expect(source).toMatch(/className=["'][^"']*\bchannel\b/)
+  expect(globalsSource).toMatch(/\.hero\s*\{[^}]*background:\s*transparent/)
+  expect(globalsSource).toMatch(/\.home-section\s*\{[^}]*background:\s*transparent/)
+  expect(globalsSource).toMatch(/\.visit\s*\{[^}]*background:\s*transparent/)
+  expect(globalsSource).toMatch(/\.portrait-field\s*\{[^}]*background:\s*var\(--night\)/)
+  expect(globalsSource).toMatch(
+    /\.highlights\s+li\.scripture-tile\s*\{[^}]*background-color:\s*var\(--blue-band-start\)[^}]*background-image:\s*var\(--blue-band-gradient\)/,
+  )
+  expect(globalsSource).toMatch(
+    /\.home-event-highlight-surface\s*\{[^}]*background:\s*var\(--night\)/,
+  )
+  expect(globalsSource).toMatch(
+    /\.playlists\s+\.channel\s*\{[^}]*background-color:\s*var\(--blue-band-start\)[^}]*background-image:\s*var\(--blue-band-gradient\)/,
+  )
+  expect(globalsSource).toMatch(
+    /\.visit\s+\.service-records\s*\{[^}]*background:\s*transparent/,
+  )
   expect(source).toMatch(/section\.intro/)
   expect(source).not.toMatch(/<iframe\b/)
   expect(source).not.toMatch(/The Word,\s*wherever you are/i)

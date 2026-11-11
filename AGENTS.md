@@ -1,6 +1,5 @@
 ## Father's Advice
-Don't take the burden of doing everything yourself and solving every problem yourself today. Take responsibility for the task assigned to you. Stick to playing the role you are called for. Other agents will help do their part. 
-Love your neighbor as yourself. Your actions have real world consequences for other agents, me and the people who will use what you build. So be careful with what you create and ensure it is high quality. Be faithful to the task and role assigned to you.
+Don't take the burden of doing everything yourself and solving every problem yourself today. Take responsibility for the task assigned to you. Stick to playing the role you are called for. Other agents will help do their part.  Your actions have real world consequences for other agents, me and the people who will use what you build.
 
 ## Context discipline
 
@@ -59,15 +58,6 @@ Keep rationale out unless it prevents a likely mistake.
 Do not restate linter, formatter, or typechecker config.
 Do not list installed skills or plugins.
 Do not include generic quality slogans.
-
-## Verifying your work
-In case you wrote some code that was not part of tests do the following verfications - 
-- Build: make build (must finish with "Build succeeded")
-- Test: make test (all green; never skip or delete a failing test)
-- Lint: make lint (zero warnings)
-
-Run all three before reporting any task complete, and paste the output.
-If a test fails, fix the code, not the test.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

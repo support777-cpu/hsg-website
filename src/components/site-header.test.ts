@@ -7,7 +7,7 @@ const source = readFileSync(join(import.meta.dirname, "site-header.tsx"), "utf8"
 
 test("brand link is logo-only with church accessible name", () => {
   expect(source).toMatch(/aria-label=\{church\.name\}/)
-  expect(source).toMatch(/src=["']\/brand\/hsg-logo\.jpg["']/)
+  expect(source).toMatch(/src=["']\/brand\/hsg-logo\.png["']/)
   expect(source).toMatch(/alt=["']["']/)
   expect(source).not.toMatch(/<span>\s*\{church\.name\}\s*<\/span>/)
 })

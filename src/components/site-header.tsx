@@ -81,7 +81,7 @@ export function SiteHeader() {
   return (
     <header className="site-header">
       <Link href="/" scroll={false} className="brand-link" aria-label={church.name}>
-        <Image src="/brand/hsg-logo.jpg" alt="" width={1024} height={592} className="logo-mark header-mark" />
+        <Image src="/brand/hsg-logo.png" alt="" width={1024} height={592} className="logo-mark header-mark" />
       </Link>
       <button
         ref={menu}

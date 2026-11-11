@@ -6,6 +6,7 @@ import { expect, test } from "vitest"
 import { sections } from "@/content/home"
 
 const source = readFileSync(join(import.meta.dirname, "page.tsx"), "utf8")
+const globalsSource = readFileSync(join(import.meta.dirname, "../globals.css"), "utf8")
 const homeSource = readFileSync(join(import.meta.dirname, "../page.tsx"), "utf8")
 const repoRoot = join(import.meta.dirname, "../..")
 
@@ -39,8 +40,18 @@ test("document title is Events; h1 Events; no IST note or placeholders", () => {
   expect(source).not.toMatch(/This page will be published here/)
 })
 
-test("featured rows use cobalt breakout with h2, when-line, optional description and photo, then scope", () => {
+test("featured rows use a bounded breakout with h2, when-line, optional description and photo, then scope", () => {
   expect(source).toMatch(/className=["'][^"']*breakout/)
+  expect(globalsSource).toMatch(/\.timeline\s*\{[^}]*background:\s*transparent/)
+  expect(globalsSource).toMatch(/\.sunday\s*\{[^}]*background:\s*transparent/)
+  expect(globalsSource).toMatch(
+    /\.breakout\s*\{[^}]*background-color:\s*var\(--blue-band-start\)[^}]*background-image:\s*var\(--blue-band-gradient\)/,
+  )
+  expect(globalsSource).toMatch(/\.breakout\s+\.photo\s*\{[^}]*background:\s*var\(--night\)/)
+  expect(globalsSource).toMatch(/\.add-menu\s*\{[^}]*background:\s*var\(--surface-sunken\)/)
+  expect(globalsSource).toMatch(
+    /\.sunday\s+\.add-menu\s*\{[^}]*background:\s*var\(--surface-sunken\)/,
+  )
   expect(source).toMatch(/<h2[\s\S]*?\{?row\.name|event\.name|featured/)
   expect(source).toMatch(/whenLine|when-line|className=["']when["']/)
   expect(source).toMatch(/description/)

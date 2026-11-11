@@ -30,7 +30,7 @@ Stay in this task's production files except a forced adjacent implementation edi
 - Do not weaken existing tests. Run relevant existing checks to catch regressions, but leave all new test authoring to `test-next-task`.
 - If correct implementation requires a product decision, credential, destructive action, or scope outside the task, stop and recommend `blocked` rather than encoding a guess.
 
-Match patterns in the listed files and load only matching implementation skills. Run `make build` (must end "Build succeeded"), `make test` (all existing tests green), and `make lint` (zero warnings). Fix production code, not tests.
+Match patterns in the listed files and load only matching implementation skills.
 
 ## Return
 

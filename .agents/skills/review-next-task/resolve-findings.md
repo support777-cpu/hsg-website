@@ -19,11 +19,8 @@
 - Consolidate duplicate findings before editing shared code.
 - Read applicable implementation skills and repository instructions before changing code.
 - Keep fixes within the reviewed task's requirements and affected code, tests, and direct callers.
-- Do not leave Optional, Nit, or FYI findings unfixed.
 - Do not guess a human decision; complete independent fixes and report the unresolved decision.
 - Run verification required by repository instructions and targeted checks for the defects fixed.
-- Recheck changed code against the spec, acceptance criteria, and findings using [review-task.md](review-task.md); include all reviewed tasks affected by shared edits.
-- Continue fixing and rechecking until no finding remains except an unresolved human decision, and required checks pass, or a concrete blocker prevents further progress.
 
 ## Status
 

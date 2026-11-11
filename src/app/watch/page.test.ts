@@ -163,7 +163,19 @@ test("testimony surface shows thumbnail with play affordance; no on-page player"
   expect(testimoniesSource).not.toMatch(/fetch\s*\(/)
   expect(testimoniesSource).not.toMatch(/instagram\.com\/embed/i)
   expect(globalsSource).toMatch(
-    /\.watch-page\s+\.watch-testimony-surface[\s\S]*?background:\s*var\(--cobalt\)/,
+    /\.watch-page\s+\.watch-testimony-surface[\s\S]*?background:\s*var\(--night\)/,
+  )
+  expect(globalsSource).toMatch(
+    /\.watch-page\s*\{[^}]*background:\s*transparent/,
+  )
+  expect(globalsSource).toMatch(
+    /\.watch-page\s+\.watch-testimonies\s*\{[^}]*background:\s*transparent/,
+  )
+  expect(globalsSource).toMatch(
+    /\.watch-page\s+\.watch-sermon-rows\s*\{[^}]*background:\s*transparent/,
+  )
+  expect(globalsSource).toMatch(
+    /\.watch-page\s+\.watch-scripture\s*\{[^}]*background-color:\s*var\(--blue-band-start\)[^}]*background-image:\s*var\(--blue-band-gradient\)/,
   )
 })
 

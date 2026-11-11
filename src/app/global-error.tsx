@@ -28,7 +28,7 @@ export default function GlobalError() {
     >
       <body>
         <title>Something went wrong</title>
-        <div className="shell-page full-viewport page-width">
+        <div className="shell-page full-viewport page-width error-state">
           <p>{church.name}</p>
           <h1>Something went wrong</h1>
           <p>This page couldn&apos;t load. Reload it, or return to Home.</p>

@@ -3,6 +3,7 @@ import { expect, test, type Page } from "@playwright/test"
 import { arrival, contactStrip, visit } from "../src/content/contact"
 import { churchName, shellSentence } from "./copy"
 import {
+  bethel,
   box,
   desktop,
   expectBoxWithin,
@@ -12,8 +13,6 @@ import {
   tabletViewportLabel,
   tabletViewports,
 } from "./helpers"
-
-const creamBand = "rgb(222, 223, 201)"
 
 const liveTranslation = arrival.facts.find((fact) => fact.kind === "link")
 if (!liveTranslation || liveTranslation.kind !== "link") {
@@ -124,7 +123,7 @@ test("external http(s) links open in a new tab with G7 rel", async ({ page }) =>
   ).not.toHaveAttribute("target", "_blank")
 })
 
-test("omits SiteFooter and keeps the cream contact strip at the page bottom", async ({
+test("omits SiteFooter and keeps the contact strip on Surface at the page bottom", async ({
   page,
 }) => {
   await expect(page.locator("footer.site-footer")).toHaveCount(0)
@@ -132,7 +131,7 @@ test("omits SiteFooter and keeps the cream contact strip at the page bottom", as
 
   const strip = contactComplement(page)
   await expect(strip).toBeVisible()
-  expect(await paintedBackground(strip)).toBe(creamBand)
+  expect(await paintedBackground(strip)).toBe(bethel.surface)
 
   const visitBox = await box(visitRegion(page))
   const arrivalBox = await box(arrivalRegion(page))

@@ -8,10 +8,8 @@ import {
 import { YOUTUBE_LIVE_OFFLINE_COPY } from "../src/lib/youtube-live"
 import { churchName, shellSentence } from "./copy"
 import fixtureVideos from "./fixtures/youtube-fixture-videos.json"
-import { box, desktop, headerNav, phone } from "./helpers"
+import { bethel, box, desktop, headerNav, phone } from "./helpers"
 const FIXTURE_VIDEO_TITLES = fixtureVideos.prefix.map((video) => video.title)
-
-const ACID = "rgb(222, 231, 127)"
 
 function freeSermonsRow(page: Page) {
   return page.getByRole("region", { name: "Free sermons" })
@@ -82,6 +80,7 @@ test("scrolls four testimonies, each with name, writeup, and photo", async ({ pa
     await expect(region.getByText(testimony.writeup)).toBeVisible()
 
     const surface = region.getByRole("link", { name: `Open ${testimony.title}` })
+    await expect(surface).toHaveCSS("background-color", bethel.night)
     await expect(surface).toHaveAttribute("href", testimony.url)
     await expect(surface).toHaveAttribute("target", "_blank")
     await expect(surface).toHaveAttribute("rel", "noopener noreferrer")
@@ -92,7 +91,7 @@ test("scrolls four testimonies, each with name, writeup, and photo", async ({ pa
   await expect(region.locator(".watch-testimony-title")).toHaveCount(0)
   await expect(page.locator("iframe")).toHaveCount(0)
 })
-test("shows eight Acid sermon titles linked to their playlists and Atom thumbs", async ({
+test("shows eight sermon titles linked to their playlists and Atom thumbs", async ({
   page,
 }) => {
   await page.goto("/watch")
@@ -101,7 +100,7 @@ test("shows eight Acid sermon titles linked to their playlists and Atom thumbs",
     const row = page.getByRole("region", { name: theme.name })
     const title = row.getByRole("heading", { level: 3, name: theme.name })
     await expect(title).toBeVisible()
-    await expect(title).toHaveCSS("color", ACID)
+    await expect(title).toHaveCSS("color", bethel.accentLight)
     const playlist = title.getByRole("link", { name: theme.name })
     await expect(playlist).toHaveAttribute(
       "href",
